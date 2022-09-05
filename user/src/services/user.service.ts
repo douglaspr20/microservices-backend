@@ -1,35 +1,21 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto, LoginUserDto } from './dto';
-import { User } from './entities/user.entity';
-import { JwtPayload } from './interfaces/jwtPayload.interface';
+import { CreateUserDto, LoginUserDto } from '../interfaces/user';
+import { User } from '../entities/user.entity';
+import { JwtPayload } from '../interfaces/jwtPayload.interface';
 
 @Injectable()
-export class AuthService {
+export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
   ) {}
   async register(createUserDto: CreateUserDto) {
-    const { password, email } = createUserDto;
-
-    const user = await this.userRepository.findOne({
-      where: {
-        email,
-      },
-    });
-
-    if (user) {
-      throw new BadRequestException('User already exists');
-    }
+    const { password } = createUserDto;
 
     const newUser = this.userRepository.create({
       ...createUserDto,
@@ -52,18 +38,30 @@ export class AuthService {
       select: { id: true, email: true, password: true },
     });
 
-    if (!user) {
-      throw new NotFoundException('User or password wrong');
-    }
-
     if (!bcrypt.compareSync(password, user.password)) {
-      throw new NotFoundException('User or password wrong');
+      return false;
     }
 
     return {
       ...user,
       token: this.getJwtToken({ id: user.id }),
     };
+  }
+
+  async searchUserByEmail(email: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        email,
+      },
+    });
+
+    return user;
+  }
+
+  async searchUserById(id: number) {
+    const user = await this.userRepository.findOneBy({ id });
+
+    return user;
   }
 
   private getJwtToken(payload: JwtPayload) {

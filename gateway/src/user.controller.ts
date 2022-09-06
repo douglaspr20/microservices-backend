@@ -72,7 +72,7 @@ export class UserController {
           data: null,
           errors: null,
         },
-        HttpStatus.UNAUTHORIZED,
+        getUserResponse.status,
       );
     }
 

@@ -66,7 +66,7 @@ export class UserController {
   async login(@Body() userInfo: LoginUserDto): Promise<IUserSearchResponse> {
     if (!userInfo.email || !userInfo.password) {
       return {
-        status: HttpStatus.NOT_FOUND,
+        status: HttpStatus.UNAUTHORIZED,
         message: 'User not found',
         user: null,
       };
@@ -76,7 +76,7 @@ export class UserController {
 
     if (!user) {
       return {
-        status: HttpStatus.NOT_FOUND,
+        status: HttpStatus.UNAUTHORIZED,
         message: 'User not found',
         user: null,
       };

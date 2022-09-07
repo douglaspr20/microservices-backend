@@ -6,6 +6,7 @@ import { ConfigService } from './services/config.service';
 
 async function bootstrap() {
   const configService = new ConfigService();
+
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     UserModule,
     {

@@ -9,7 +9,7 @@ import {
   LoginUserDto,
 } from './interfaces/user';
 
-@Controller('auth')
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -27,7 +27,7 @@ export class UserController {
     }
 
     const userAlreadyExist = await this.userService.searchUserByEmail(
-      createUserDto.email,
+      createUserDto.Email,
     );
 
     if (userAlreadyExist) {
@@ -45,7 +45,7 @@ export class UserController {
 
     try {
       const createdUser = await this.userService.register(createUserDto);
-      delete createdUser.password;
+      delete createdUser.Password;
       return {
         status: HttpStatus.CREATED,
         message: 'User created successfully',
@@ -53,6 +53,7 @@ export class UserController {
         errors: null,
       };
     } catch (e) {
+      console.log(e);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
@@ -64,7 +65,7 @@ export class UserController {
 
   @MessagePattern('user_login')
   async login(@Body() userInfo: LoginUserDto): Promise<IUserSearchResponse> {
-    if (!userInfo.email || !userInfo.password) {
+    if (!userInfo.Email || !userInfo.Password) {
       return {
         status: HttpStatus.UNAUTHORIZED,
         message: 'User not found',

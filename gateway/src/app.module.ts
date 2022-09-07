@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ClientProxyFactory } from '@nestjs/microservices';
 import { ConfigService } from './services/config.service';
 import { UserController } from './user.controller';
-import { AppService } from './app.service';
+import { AppService } from './services/app.service';
 
 @Module({
   imports: [],

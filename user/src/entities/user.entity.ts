@@ -12,28 +12,36 @@ export class User {
   id: number;
 
   @Column('text')
-  firstName: string;
+  Email: string;
 
   @Column('text')
-  lastName: string;
+  FirstName: string;
 
-  @Column('varchar', { length: 255, unique: true })
-  email: string;
+  @Column('text')
+  LastName: string;
 
   @Column('text', {
     select: false,
   })
-  password: string;
+  Password: string;
 
-  @Column('varchar', {
-    length: 255,
+  @Column('text')
+  State: string;
+
+  @Column('bigint')
+  WorkPhone: number;
+
+  @Column('date')
+  Birthdate: string;
+
+  @Column('text', {
     default: 'user',
   })
-  role: string;
+  Role: string;
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
-    this.email = this.email.toLowerCase().trim();
+    this.Email = this.Email.toLowerCase().trim();
   }
 
   @BeforeUpdate()

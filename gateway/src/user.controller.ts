@@ -9,11 +9,11 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { AppService } from './app.service';
+import { AppService } from './services/app.service';
 import {
   CreateUserDto,
   CreateUserResponseDto,
-  IServiceUserSearchResponse,
+  IUserSearchResponse,
   IUserCreateResponse,
   LoginUserDto,
 } from './interfaces/user';
@@ -30,7 +30,7 @@ export class UserController {
     return this.appService.getHello();
   }
 
-  @Post('register')
+  @Post('/auth/register')
   async register(
     @Body() createUserDto: CreateUserDto,
   ): Promise<CreateUserResponseDto> {
@@ -59,9 +59,9 @@ export class UserController {
     };
   }
 
-  @Post('login')
+  @Post('/auth/login')
   async login(@Body() userInfo: LoginUserDto): Promise<CreateUserResponseDto> {
-    const getUserResponse: IServiceUserSearchResponse = await firstValueFrom(
+    const getUserResponse: IUserSearchResponse = await firstValueFrom(
       this.userServiceClient.send('user_login', userInfo),
     );
 

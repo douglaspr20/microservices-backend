@@ -4,20 +4,34 @@ import {
   MinLength,
   MaxLength,
   Matches,
+  IsNumber,
+  IsDate,
 } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
   @MinLength(2)
-  firstName: string;
+  FirstName: string;
 
   @IsString()
   @MinLength(2)
-  lastName: string;
+  LastName: string;
 
   @IsString()
   @IsEmail()
-  email: string;
+  Email: string;
+
+  @IsString()
+  @IsEmail()
+  State: string;
+
+  @IsNumber()
+  @MinLength(8)
+  WorkPhone: number;
+
+  @IsDate()
+  @IsEmail()
+  Birthdate: string;
 
   @IsString()
   @MinLength(8)
@@ -26,5 +40,5 @@ export class CreateUserDto {
     message:
       'Minimum eight characters, at least one letter, one number and one special character:',
   })
-  password: string;
+  Password: string;
 }

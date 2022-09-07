@@ -15,11 +15,11 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
   async register(createUserDto: CreateUserDto) {
-    const { password } = createUserDto;
+    const { Password } = createUserDto;
 
     const newUser = this.userRepository.create({
       ...createUserDto,
-      password: bcrypt.hashSync(password, 12),
+      Password: bcrypt.hashSync(Password, 12),
     });
 
     await this.userRepository.save(newUser);
@@ -31,14 +31,14 @@ export class UserService {
   }
 
   async login(userInfo: LoginUserDto) {
-    const { email, password } = userInfo;
+    const { Email, Password } = userInfo;
 
     const user = await this.userRepository.findOne({
-      where: { email },
-      select: { id: true, email: true, password: true },
+      where: { Email },
+      select: { id: true, Email: true, Password: true },
     });
 
-    if (!bcrypt.compareSync(password, user.password)) {
+    if (!bcrypt.compareSync(Password, user.Password)) {
       return false;
     }
 
@@ -48,10 +48,10 @@ export class UserService {
     };
   }
 
-  async searchUserByEmail(email: string) {
+  async searchUserByEmail(Email: string) {
     const user = await this.userRepository.findOne({
       where: {
-        email,
+        Email,
       },
     });
 

@@ -1,11 +1,4 @@
-import {
-  IsString,
-  IsEmail,
-  MinLength,
-  IsNumber,
-  IsDateString,
-  Min,
-} from 'class-validator';
+import { IsString, IsEmail, MinLength, IsNumber, Min } from 'class-validator';
 
 export class CreateClientDto {
   @IsString()
@@ -30,9 +23,12 @@ export class CreateClientDto {
   })
   WorkPhone: number;
 
-  @IsDateString()
+  @IsString()
   Birthdate: string;
 
   @IsString()
   Test: string;
+
+  @IsString()
+  authorization: string;
 }

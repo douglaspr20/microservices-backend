@@ -23,6 +23,7 @@ import { AppService } from './services/app.service';
         const clientServiceOptions = configService.get('clientService');
         return ClientProxyFactory.create(clientServiceOptions);
       },
+      inject: [ConfigService],
     },
     AppService,
   ],

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { getRequestHeaderParam } from './decorators/getRequestHeaderParam.decorator';
 import { AuthGuard } from './guards/auth.guard';
 import {
   CreateClientDto,
@@ -37,9 +38,13 @@ export class ClientController {
   @Post('addClient')
   async addClient(
     @Body() createClientDto: CreateClientDto,
+    @getRequestHeaderParam('authorization') param: string,
   ): Promise<CreateClientResponseDto> {
     const createdClientResponse: IClientAddedResponse = await firstValueFrom(
-      this.clientServiceClient.send('add_client', createClientDto),
+      this.clientServiceClient.send('add_client', {
+        ...createClientDto,
+        authorization: param,
+      }),
     );
 
     if (createdClientResponse.status !== HttpStatus.CREATED) {
@@ -55,19 +60,21 @@ export class ClientController {
 
     return {
       message: createdClientResponse.message,
-      data: {
-        ...createdClientResponse.client,
-      },
+      data: createdClientResponse.data,
       errors: null,
     };
   }
 
-  @Put('updateclient')
+  @Put('updateClient')
   async updateClient(
     @Body() updateClientDto: UpdateClientDto,
+    @getRequestHeaderParam('authorization') param: string,
   ): Promise<CreateClientResponseDto> {
     const updateClientResponse: IClientUpdateResponse = await firstValueFrom(
-      this.clientServiceClient.send('update_client', updateClientDto),
+      this.clientServiceClient.send('update_client', {
+        ...updateClientDto,
+        authorization: param,
+      }),
     );
 
     if (updateClientResponse.status !== HttpStatus.OK) {
@@ -83,9 +90,8 @@ export class ClientController {
 
     return {
       message: updateClientResponse.message,
-      data: {
-        ...updateClientResponse.client,
-      },
+      data: updateClientResponse.data,
+
       errors: null,
     };
   }

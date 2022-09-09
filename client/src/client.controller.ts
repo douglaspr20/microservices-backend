@@ -122,6 +122,9 @@ export class ClientController {
       };
     } catch (e) {
       const { response, message } = e as AxiosError;
+
+      console.log(response);
+
       if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
         return {
           status: response.status,

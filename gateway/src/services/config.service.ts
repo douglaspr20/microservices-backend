@@ -20,6 +20,13 @@ export class ConfigService {
       },
       transport: Transport.TCP,
     };
+    this.envConfig.classService = {
+      options: {
+        port: process.env.CLASS_SERVICE_PORT,
+        host: process.env.CLASS_SERVICE_HOST,
+      },
+      transport: Transport.TCP,
+    };
   }
 
   get(key: string): any {

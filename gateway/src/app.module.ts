@@ -3,10 +3,11 @@ import { ClientProxyFactory } from '@nestjs/microservices';
 import { ConfigService } from './services/config.service';
 import { UserController } from './user.controller';
 import { ClientController } from './client.controller';
+import { ClassController } from './class.controller';
 import { AppService } from './services/app.service';
 @Module({
   imports: [],
-  controllers: [UserController, ClientController],
+  controllers: [UserController, ClientController, ClassController],
   providers: [
     ConfigService,
     {
@@ -22,6 +23,14 @@ import { AppService } from './services/app.service';
       useFactory: (configService: ConfigService) => {
         const clientServiceOptions = configService.get('clientService');
         return ClientProxyFactory.create(clientServiceOptions);
+      },
+      inject: [ConfigService],
+    },
+    {
+      provide: 'CLASS_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        const classServiceOptions = configService.get('classService');
+        return ClientProxyFactory.create(classServiceOptions);
       },
       inject: [ConfigService],
     },

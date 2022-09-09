@@ -34,7 +34,7 @@ export class ClientController {
       };
     }
 
-    if (!createClientDto.authorization) {
+    if (!authorization || authorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
         message: 'Forbidden',
@@ -91,7 +91,7 @@ export class ClientController {
       searchText = '',
     } = getclientsDto;
 
-    if (!getclientsDto.authorization || getclientsDto.authorization === '') {
+    if (!authorization || authorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
         message: 'Forbidden',
@@ -153,6 +153,15 @@ export class ClientController {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Missing data for update client',
+        data: null,
+        errors: null,
+      };
+    }
+
+    if (!authorization || authorization === '') {
+      return {
+        status: HttpStatus.FORBIDDEN,
+        message: 'Forbidden',
         data: null,
         errors: null,
       };

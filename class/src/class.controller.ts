@@ -46,7 +46,7 @@ export class ClassController {
 
     try {
       const response = await this.httpService.axiosRef.get(
-        `${this.baseUrl}/clients`,
+        `${this.baseUrl}/classes`,
       );
 
       return {

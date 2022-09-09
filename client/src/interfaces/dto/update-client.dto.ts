@@ -7,6 +7,7 @@ export class UpdateClientDto {
   @IsNotEmptyObject()
   Client: Client;
 
+  @IsBoolean()
   SendEmail?: boolean;
 
   @IsBoolean()

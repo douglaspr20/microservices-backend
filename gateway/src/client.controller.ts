@@ -7,6 +7,7 @@ import {
   Inject,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -17,6 +18,7 @@ import {
   CreateClientDto,
   CreateClientResponseDto,
   IClientAddedResponse,
+  IGetClientsResponse,
   UpdateClientDto,
 } from './interfaces/client';
 import { IClientUpdateResponse } from './interfaces/client/updateClientResponse.interface';
@@ -61,6 +63,40 @@ export class ClientController {
     return {
       message: createdClientResponse.message,
       data: createdClientResponse.data,
+      errors: null,
+    };
+  }
+
+  @Get('clients')
+  async getClients(
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+    @Query('searchText') searchText: string,
+    @getRequestHeaderParam('authorization') param: string,
+  ) {
+    const getClientsReponse: IGetClientsResponse = await firstValueFrom(
+      this.clientServiceClient.send('get_clients', {
+        limit,
+        offset,
+        searchText,
+        authorization: param,
+      }),
+    );
+
+    if (getClientsReponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getClientsReponse.message,
+          data: null,
+          errors: getClientsReponse.errors,
+        },
+        getClientsReponse.status,
+      );
+    }
+
+    return {
+      message: getClientsReponse.message,
+      data: getClientsReponse.data,
       errors: null,
     };
   }

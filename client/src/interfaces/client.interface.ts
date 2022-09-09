@@ -1,4 +1,5 @@
 export interface IClient {
+  SuspensionInfo: SuspensionInfo;
   AppointmentGenderPreference: string;
   BirthDate: string;
   Country: string;
@@ -55,6 +56,12 @@ export interface IClient {
   SendScheduleTexts: boolean;
   HomeLocation: ClientHomeLocation | null;
   LockerNumber: null;
+}
+
+export interface SuspensionInfo {
+  BookingSuspended: boolean;
+  SuspensionStartDate: string | null;
+  SuspensionEndDate: string | null;
 }
 
 export interface ClientCreditCard {

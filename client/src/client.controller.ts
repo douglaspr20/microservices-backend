@@ -1,10 +1,13 @@
 import { Controller, Body, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { AxiosError } from 'axios';
 import { MessagePattern } from '@nestjs/microservices';
 import { ConfigService } from './services/config.service';
 import {
   CreateClientDto,
   CreateClientResponseDto,
+  GetClientsDto,
+  GetClientsResponseDto,
   UpdateClientDto,
 } from './interfaces';
 
@@ -56,7 +59,78 @@ export class ClientController {
         errors: null,
       };
     } catch (e) {
-      console.log(e);
+      const { response, message } = e as AxiosError;
+
+      console.log(response);
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          data: null,
+          message: message,
+          errors: e.errors,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        data: null,
+        errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('get_clients')
+  async getClients(
+    @Body() getclientsDto: GetClientsDto,
+  ): Promise<GetClientsResponseDto> {
+    const {
+      limit = 100,
+      offset = 0,
+      authorization,
+      searchText = '',
+    } = getclientsDto;
+
+    if (!getclientsDto.authorization || getclientsDto.authorization === '') {
+      return {
+        status: HttpStatus.FORBIDDEN,
+        message: 'Forbidden',
+        data: null,
+        errors: null,
+      };
+    }
+
+    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
+      authorization;
+
+    this.httpService.axiosRef.defaults.params = {
+      limit,
+      offset,
+      searchText,
+    };
+
+    try {
+      const response = await this.httpService.axiosRef.get(
+        `${this.baseUrl}/clients`,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Clients Found',
+        data: response.data,
+        errors: null,
+      };
+    } catch (e) {
+      const { response, message } = e as AxiosError;
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          data: null,
+          message: message,
+          errors: e.errors,
+        };
+      }
+
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
@@ -97,13 +171,15 @@ export class ClientController {
         errors: null,
       };
     } catch (e) {
-      console.log(e.response);
+      const { response, message } = e as AxiosError;
 
-      if (e.response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+      console.log(response);
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
         return {
-          status: e.response.status as number,
+          status: response.status,
           data: null,
-          message: e.response.data.Error.Message as string,
+          message: message,
           errors: e.errors,
         };
       }

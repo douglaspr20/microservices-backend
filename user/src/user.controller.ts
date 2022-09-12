@@ -7,7 +7,8 @@ import {
   IUserSearchResponse,
   IUserCreateResponse,
   LoginUserDto,
-} from './interfaces/user';
+  GetUserByIdDto,
+} from './interfaces';
 
 @Controller('user')
 export class UserController {
@@ -78,6 +79,35 @@ export class UserController {
     if (!user) {
       return {
         status: HttpStatus.UNAUTHORIZED,
+        message: 'User not found',
+        user: null,
+      };
+    }
+
+    return {
+      status: HttpStatus.OK,
+      message: 'User login successfully',
+      user: user,
+    };
+  }
+
+  @MessagePattern('search_user_by_id')
+  async searchUserById(
+    @Body() getUserByIdDto: GetUserByIdDto,
+  ): Promise<IUserSearchResponse> {
+    if (!getUserByIdDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Bad request, data missing',
+        user: null,
+      };
+    }
+
+    const user = await this.userService.searchUserById(getUserByIdDto.userId);
+
+    if (!user) {
+      return {
+        status: HttpStatus.NOT_FOUND,
         message: 'User not found',
         user: null,
       };

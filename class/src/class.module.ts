@@ -10,9 +10,10 @@ import { ClassService } from './services/class.service';
     ConfigModule,
     HttpModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
+        baseURL: `${configService.get('mindbodyBaseUrl')}/class`,
         headers: {
-          'API-Key': configService.get('minbodyApiKey'),
-          SiteId: configService.get('minbodySiteId'),
+          'API-Key': configService.get('mindbodyApiKey'),
+          SiteId: configService.get('mindbodySiteId'),
         },
       }),
       inject: [ConfigService],

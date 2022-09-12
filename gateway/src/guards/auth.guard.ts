@@ -1,15 +1,46 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  HttpStatus,
+} from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { IUserSearchResponse } from 'src/interfaces/user';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const { authorization } = request.headers;
+  constructor(
+    @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
+    @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
+  ) {}
 
-    if (!authorization || authorization === '') return false;
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const { authorization, selfAuthorization } = request.headers;
+
+    const userTokenInfo = await firstValueFrom(
+      this.tokenServiceClient.send('token_decode', {
+        token: selfAuthorization,
+      }),
+    );
+
+    if (!authorization || authorization === '' || !selfAuthorization)
+      return false;
+
+    if (!userTokenInfo || !userTokenInfo.userId) {
+      return false;
+    }
+
+    const searchUserResponse: IUserSearchResponse = await firstValueFrom(
+      this.userServiceClient.send('search_user_by_id', userTokenInfo.userId),
+    );
+
+    if (searchUserResponse.status !== HttpStatus.OK) {
+      return false;
+    }
+    request.user = searchUserResponse.user;
 
     return true;
   }

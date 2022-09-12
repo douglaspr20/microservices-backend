@@ -5,11 +5,10 @@ export class ConfigService {
     this.envConfig = {
       host: process.env.CLIENT_SERVICE_HOST,
       port: process.env.CLIENT_SERVICE_PORT,
+      mindbodyBaseUrl: process.env.MINDBODY_BASE_URL,
+      mindbodyApiKey: process.env.MINDBODY_API_KEY,
+      mindbodySiteId: process.env.MINDBODY_SITE_ID,
     };
-    this.envConfig.gatewayPort = process.env.API_GATEWAY_PORT;
-    this.envConfig.mindbodyBaseUrl = process.env.MINDBODY_BASE_URL;
-    this.envConfig.minbodyApiKey = process.env.MINDBODY_API_KEY;
-    this.envConfig.minbodySiteId = process.env.MINDBODY_SITE_ID;
   }
 
   get(key: string): any {

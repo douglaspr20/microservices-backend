@@ -17,6 +17,7 @@ import { AuthGuard } from './guards/auth.guard';
 import {
   CreateClientDto,
   CreateClientResponseDto,
+  GetClientsResponseDto,
   IClientAddedResponse,
   IGetClientsResponse,
   UpdateClientDto,
@@ -73,7 +74,7 @@ export class ClientController {
     @Query('offset') offset: number,
     @Query('searchText') searchText: string,
     @getRequestHeaderParam('authorization') param: string,
-  ) {
+  ): Promise<GetClientsResponseDto> {
     const getClientsReponse: IGetClientsResponse = await firstValueFrom(
       this.clientServiceClient.send('get_clients', {
         limit,

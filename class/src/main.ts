@@ -1,14 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ClientModule } from './client.module';
+import { Transport, MicroserviceOptions } from '@nestjs/microservices';
+import { ClassModule } from './class.module';
 import { ConfigService } from './services/config.service';
 
 async function bootstrap() {
   const configService = new ConfigService();
 
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    ClientModule,
+    ClassModule,
     {
       transport: Transport.TCP,
       options: {
@@ -24,6 +24,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
   await app.listen();
 }
 bootstrap();

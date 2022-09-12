@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ClientModule } from './client.module';
 import { ConfigService } from './services/config.service';
@@ -15,6 +16,13 @@ async function bootstrap() {
         port: configService.get('port'),
       },
     },
+  );
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
   );
   await app.listen();
 }

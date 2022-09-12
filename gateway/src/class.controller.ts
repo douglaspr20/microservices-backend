@@ -6,19 +6,24 @@ import {
   UseGuards,
   HttpStatus,
   HttpException,
+  Post,
+  Body,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { getRequestHeaderParam } from './decorators/getRequestHeaderParam.decorator';
+import { AppService } from './services/app.service';
 import { AuthGuard } from './guards/auth.guard';
 import {
+  AddClientToClassDto,
+  AddClientToClassResponseDto,
   getClassDescriptionDto,
   GetClassDescriptionResponseDto,
   GetClassesResponseDto,
   IGetClassDescriptionResponse,
   IGetClassesResponse,
 } from './interfaces/class';
-import { AppService } from './services/app.service';
+import { IAddClientToClassResponse } from './interfaces/class/addClientToClassResponse.interface';
 
 @UseGuards(AuthGuard)
 @Controller('class')
@@ -92,6 +97,37 @@ export class ClassController {
     return {
       message: getClassDescriptionsResponse.message,
       data: getClassDescriptionsResponse.data,
+      errors: null,
+    };
+  }
+
+  @Post('addClientToClass')
+  async addClientToClass(
+    @Body() addClientToClassDto: AddClientToClassDto,
+    @getRequestHeaderParam('authorization') param: string,
+  ): Promise<AddClientToClassResponseDto> {
+    const addClientToClassResponse: IAddClientToClassResponse =
+      await firstValueFrom(
+        this.classServiceClient.send('add_client_to_class', {
+          ...addClientToClassDto,
+          authorization: param,
+        }),
+      );
+
+    if (addClientToClassResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: addClientToClassResponse.message,
+          data: null,
+          errors: addClientToClassResponse.errors,
+        },
+        addClientToClassResponse.status,
+      );
+    }
+
+    return {
+      message: addClientToClassResponse.message,
+      data: addClientToClassResponse.data,
       errors: null,
     };
   }

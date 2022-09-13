@@ -66,26 +66,31 @@ export class UserController {
 
     let minbodyClientId: number;
 
-    if (searchExistClientMinBodyReponse.status === HttpStatus.OK) {
+    if (
+      searchExistClientMinBodyReponse.status === HttpStatus.OK &&
+      searchExistClientMinBodyReponse.data.Clients.length > 0
+    ) {
       minbodyClientId = searchExistClientMinBodyReponse.data.Clients[0].Id;
-    }
-
-    const createdClientResponse: IClientAddedResponse = await firstValueFrom(
-      this.clientServiceClient.send('add_client', {
-        ...createUserDto,
-        authorization: minbodyToken,
-      }),
-    );
-
-    if (createdClientResponse.status !== HttpStatus.CREATED) {
-      throw new HttpException(
-        {
-          message: createdClientResponse.message,
-          data: null,
-          errors: createdClientResponse.errors,
-        },
-        createdClientResponse.status,
+    } else {
+      const createdClientResponse: IClientAddedResponse = await firstValueFrom(
+        this.clientServiceClient.send('add_client', {
+          ...createUserDto,
+          authorization: minbodyToken,
+        }),
       );
+
+      if (createdClientResponse.status !== HttpStatus.CREATED) {
+        throw new HttpException(
+          {
+            message: createdClientResponse.message,
+            data: null,
+            errors: createdClientResponse.errors,
+          },
+          createdClientResponse.status,
+        );
+      }
+
+      minbodyClientId = createdClientResponse.data.Id;
     }
 
     const registerUserReponse: IUserCreateResponse = await firstValueFrom(
@@ -111,17 +116,6 @@ export class UserController {
         userId: registerUserReponse.user.id,
       }),
     );
-
-    if (createdClientResponse.status !== HttpStatus.CREATED) {
-      throw new HttpException(
-        {
-          message: registerUserReponse.message,
-          data: null,
-          errors: registerUserReponse.errors,
-        },
-        registerUserReponse.status,
-      );
-    }
 
     return {
       message: registerUserReponse.message,

@@ -18,15 +18,15 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const { authorization, selfauthorization } = request.headers;
+    const { authorization, mindBodyAuthorization } = request.headers;
 
     const userTokenInfo = await firstValueFrom(
       this.tokenServiceClient.send('validate_token', {
-        token: selfauthorization,
+        token: authorization,
       }),
     );
 
-    if (!authorization || authorization === '' || !selfauthorization) {
+    if (!authorization || authorization === '' || !mindBodyAuthorization) {
       return false;
     }
 

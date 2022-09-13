@@ -3,8 +3,8 @@ export class ConfigService {
 
   constructor() {
     this.envConfig = {
-      host: process.env.CLIENT_SERVICE_HOST,
-      port: process.env.CLIENT_SERVICE_PORT,
+      host: process.env.TOKEN_SERVICE_HOST,
+      port: process.env.TOKEN_SERVICE_PORT,
       mindbodyBaseUrl: process.env.MINDBODY_BASE_URL,
       mindbodyApiKey: process.env.MINDBODY_API_KEY,
       mindbodySiteId: process.env.MINDBODY_SITE_ID,

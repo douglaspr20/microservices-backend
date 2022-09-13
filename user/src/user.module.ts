@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserService } from './services/user.service';
 import { UserController } from './user.controller';
+import { ConfigService } from './services/config.service';
 import { User } from './entities/user.entity';
 
 @Module({
@@ -13,15 +14,16 @@ import { User } from './entities/user.entity';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: configService.get('DB_PORT'),
-        username: configService.get('DB_USER'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME'),
+        host: configService.get('dbHost'),
+        port: configService.get('dbPort'),
+        username: configService.get('dbUser'),
+        password: configService.get('dbPassword'),
+        database: configService.get('dbName'),
         autoLoadEntities: true,
         synchronize:
-          configService.get('NODE_ENV') === 'development' ? true : false,
+          configService.get('nodeEnv') === 'development' ? true : false,
       }),
+      extraProviders: [ConfigService],
     }),
     TypeOrmModule.forFeature([User]),
   ],

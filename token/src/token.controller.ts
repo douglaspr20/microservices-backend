@@ -69,19 +69,20 @@ export class TokenController {
   async decodeToken(
     @Body() decodeTokenDto: DecodeTokenDto,
   ): Promise<DecodeTokenResponseDto> {
+    console.log(decodeTokenDto);
     const tokenData = this.tokenService.validateToken(decodeTokenDto.token);
 
     if (!tokenData) {
       return {
         status: HttpStatus.UNAUTHORIZED,
         message: 'Unauthorized',
-        token: null,
+        userId: null,
       };
     }
     return {
       status: HttpStatus.OK,
       message: 'Token validate',
-      token: tokenData,
+      userId: tokenData,
     };
   }
 }

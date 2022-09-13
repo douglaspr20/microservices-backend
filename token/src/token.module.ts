@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TokenController } from './token.controller';
 import { TokenService } from './services/token.service';
 import { ConfigService } from './services/config.service';
+import { JwtConfigService } from './services/jwt-config.service';
 
 @Module({
   imports: [
@@ -21,17 +22,10 @@ import { ConfigService } from './services/config.service';
       extraProviders: [ConfigService],
     }),
     JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
-        signOptions: {
-          expiresIn: '1d',
-        },
-      }),
+      useClass: JwtConfigService,
     }),
   ],
   controllers: [TokenController],
-  providers: [TokenService],
+  providers: [TokenService, ConfigService, JwtConfigService],
 })
 export class TokenModule {}

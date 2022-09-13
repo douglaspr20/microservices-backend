@@ -18,16 +18,17 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const { authorization, selfAuthorization } = request.headers;
+    const { authorization, selfauthorization } = request.headers;
 
     const userTokenInfo = await firstValueFrom(
-      this.tokenServiceClient.send('token_decode', {
-        token: selfAuthorization,
+      this.tokenServiceClient.send('validate_token', {
+        token: selfauthorization,
       }),
     );
 
-    if (!authorization || authorization === '' || !selfAuthorization)
+    if (!authorization || authorization === '' || !selfauthorization) {
       return false;
+    }
 
     if (!userTokenInfo || !userTokenInfo.userId) {
       return false;
@@ -40,6 +41,7 @@ export class AuthGuard implements CanActivate {
     if (searchUserResponse.status !== HttpStatus.OK) {
       return false;
     }
+
     request.user = searchUserResponse.user;
 
     return true;

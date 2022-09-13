@@ -39,6 +39,9 @@ export class User {
   })
   Role: string;
 
+  @Column('int')
+  MindBodyClientId: number;
+
   @BeforeInsert()
   checkFieldsBeforeInsert() {
     this.Email = this.Email.toLowerCase().trim();

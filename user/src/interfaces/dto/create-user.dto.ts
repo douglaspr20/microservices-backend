@@ -41,4 +41,7 @@ export class CreateUserDto {
       'Minimum eight characters, at least one letter, one number and one special character:',
   })
   Password: string;
+
+  @IsNumber()
+  MindBodyClientId: number;
 }

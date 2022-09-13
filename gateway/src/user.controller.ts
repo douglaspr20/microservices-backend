@@ -60,7 +60,7 @@ export class UserController {
       await firstValueFrom(
         this.clientServiceClient.send('get_clients', {
           searchText: createUserDto.Email,
-          authorization: minbodyToken,
+          mindbodyauthorization: minbodyToken,
         }),
       );
 
@@ -75,7 +75,7 @@ export class UserController {
       const createdClientResponse: IClientAddedResponse = await firstValueFrom(
         this.clientServiceClient.send('add_client', {
           ...createUserDto,
-          authorization: minbodyToken,
+          mindbodyauthorization: minbodyToken,
         }),
       );
 

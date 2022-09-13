@@ -114,7 +114,6 @@ export class TokenController {
   async decodeToken(
     @Body() decodeTokenDto: DecodeTokenDto,
   ): Promise<DecodeTokenResponseDto> {
-    console.log(decodeTokenDto);
     const tokenData = this.tokenService.validateToken(decodeTokenDto.token);
 
     if (!tokenData) {

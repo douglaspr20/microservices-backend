@@ -18,7 +18,9 @@ export class TokenService {
       userId: number;
     };
 
-    if (!tokenData || tokenData.exp <= Math.floor(+new Date() / 1000)) {
+    const validateDate = Math.floor(new Date().getTime() / 1000);
+
+    if (!tokenData || tokenData.exp <= validateDate) {
       return null;
     }
 

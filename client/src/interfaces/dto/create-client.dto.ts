@@ -30,5 +30,5 @@ export class CreateClientDto {
   Test: string;
 
   @IsString()
-  authorization: string;
+  mindbodyauthorization: string;
 }

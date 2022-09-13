@@ -13,6 +13,13 @@ export class ConfigService {
       },
       transport: Transport.TCP,
     };
+    this.envConfig.tokenService = {
+      options: {
+        port: process.env.TOKEN_SERVICE_PORT,
+        host: process.env.TOKEN_SERVICE_HOST,
+      },
+      transport: Transport.TCP,
+    };
     this.envConfig.clientService = {
       options: {
         port: process.env.CLIENT_SERVICE_PORT,

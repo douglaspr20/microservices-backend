@@ -17,11 +17,13 @@ import {
   IUserCreateResponse,
   LoginUserDto,
 } from './interfaces/user';
+import { ICreateTokenResponse } from './interfaces/token';
 
 @Controller()
 export class UserController {
   constructor(
     private readonly appService: AppService,
+    @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
   ) {}
 
@@ -49,11 +51,18 @@ export class UserController {
       );
     }
 
+    const createTokenResponse: ICreateTokenResponse = await firstValueFrom(
+      this.tokenServiceClient.send('create_token', {
+        userId: registerUserReponse.user.id,
+      }),
+    );
+
     return {
       message: registerUserReponse.message,
       data: {
         user: registerUserReponse.user,
-        // token: registerUserReponse.token,
+        authorization: createTokenResponse.minbodyToken,
+        selfAuthorization: createTokenResponse.token,
       },
       errors: null,
     };
@@ -76,18 +85,18 @@ export class UserController {
       );
     }
 
-    // const createTokenResponse: IServiveTokenCreateResponse =
-    //   await firstValueFrom(
-    //     this.tokenServiceClient.send('token_create', {
-    //       userId: getUserResponse.user.id,
-    //     }),
-    //   );
+    const createTokenResponse: ICreateTokenResponse = await firstValueFrom(
+      this.tokenServiceClient.send('create_token', {
+        userId: getUserResponse.user.id,
+      }),
+    );
 
     return {
       message: getUserResponse.message,
       data: {
         user: getUserResponse.user,
-        token: '',
+        authorization: createTokenResponse.minbodyToken,
+        selfAuthorization: createTokenResponse.token,
       },
       errors: null,
     };

@@ -19,6 +19,14 @@ import { AppService } from './services/app.service';
       inject: [ConfigService],
     },
     {
+      provide: 'TOKEN_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        const tokenServiceOptions = configService.get('tokenService');
+        return ClientProxyFactory.create(tokenServiceOptions);
+      },
+      inject: [ConfigService],
+    },
+    {
       provide: 'CLIENT_SERVICE',
       useFactory: (configService: ConfigService) => {
         const clientServiceOptions = configService.get('clientService');

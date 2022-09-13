@@ -1,6 +1,7 @@
 import { Body, Controller, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { MessagePattern } from '@nestjs/microservices';
+import { AxiosError } from 'axios';
 import {
   AddClientToClassDto,
   AddClientToClassResponseDto,
@@ -9,17 +10,10 @@ import {
   GetClassesDto,
   GetClassesResponseDto,
 } from './interface';
-import { ConfigService } from './services/config.service';
-import { AxiosError } from 'axios';
 
 @Controller()
 export class ClassController {
-  baseUrl = `${this.configService.get('mindbodyBaseUrl')}/class`;
-
-  constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly httpService: HttpService) {}
 
   @MessagePattern('get_classes')
   async getClasses(
@@ -52,9 +46,7 @@ export class ClassController {
     };
 
     try {
-      const response = await this.httpService.axiosRef.get(
-        `${this.baseUrl}/classes`,
-      );
+      const response = await this.httpService.axiosRef.get(`/classes`);
 
       return {
         status: HttpStatus.OK,
@@ -118,7 +110,7 @@ export class ClassController {
 
     try {
       const response = await this.httpService.axiosRef.get(
-        `${this.baseUrl}/classdescriptions`,
+        `/classdescriptions`,
       );
 
       return {
@@ -179,7 +171,7 @@ export class ClassController {
 
     try {
       const response = await this.httpService.axiosRef.post(
-        `${this.baseUrl}/addclienttoclass`,
+        `/addclienttoclass`,
         addClientToClassDto,
       );
 

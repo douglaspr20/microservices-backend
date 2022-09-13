@@ -13,8 +13,6 @@ import {
 
 @Controller()
 export class ClientController {
-  baseUrl = `${this.configService.get('mindbodyBaseUrl')}/client`;
-
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
@@ -48,7 +46,7 @@ export class ClientController {
 
     try {
       const response = await this.httpService.axiosRef.post(
-        `${this.baseUrl}/addClient`,
+        `/addClient`,
         createClientDto,
       );
 
@@ -110,9 +108,7 @@ export class ClientController {
     };
 
     try {
-      const response = await this.httpService.axiosRef.get(
-        `${this.baseUrl}/clients`,
-      );
+      const response = await this.httpService.axiosRef.get(`/clients`);
 
       return {
         status: HttpStatus.OK,
@@ -172,7 +168,7 @@ export class ClientController {
 
     try {
       const response = await this.httpService.axiosRef.post(
-        `${this.baseUrl}/updateclient`,
+        `/updateclient`,
         updateClientDto,
       );
 

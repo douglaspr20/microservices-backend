@@ -5,7 +5,8 @@ export class CreateUserResponseDto {
 
   data: {
     user: IUser;
-    token?: string;
+    selfAuthorization?: string;
+    authorization?: string;
   };
   errors: { [key: string]: any };
 }

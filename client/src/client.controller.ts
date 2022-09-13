@@ -6,6 +6,8 @@ import { ConfigService } from './services/config.service';
 import {
   CreateClientDto,
   CreateClientResponseDto,
+  GetClientMemberByIdResponseDto,
+  GetClientMemberDto,
   GetClientsDto,
   GetClientsResponseDto,
   UpdateClientDto,
@@ -191,6 +193,50 @@ export class ClientController {
           errors: e.errors,
         };
       }
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        data: null,
+        errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('get_client_by_id')
+  async getClientById(
+    @Body() getClientMemberDto: GetClientMemberDto,
+  ): Promise<GetClientMemberByIdResponseDto> {
+    const { clientId } = getClientMemberDto;
+
+    this.httpService.axiosRef.defaults.params = {
+      clientId,
+    };
+
+    try {
+      const response = await this.httpService.axiosRef.get(
+        `/clientcompleteinfo`,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Client Found',
+        data: response.data,
+        errors: null,
+      };
+    } catch (e) {
+      const { response, message } = e as AxiosError;
+
+      console.log(response);
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          data: null,
+          message: message,
+          errors: e.errors,
+        };
+      }
+
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',

@@ -4,6 +4,7 @@ import { MessagePattern } from '@nestjs/microservices';
 import { AxiosError } from 'axios';
 import { TokenService } from './services/token.service';
 import {
+  CreateMindBodyTokenResponseDto,
   CreateTokenDto,
   CreateTokenResponseDto,
   DecodeTokenDto,
@@ -28,17 +29,23 @@ export class TokenController {
       const token: string = this.tokenService.createToken(createTokenDto);
 
       if (token) {
-        const { data } =
-          await this.httpService.axiosRef.post<ICreateTokenMindBody>('/issue', {
-            username: this.configService.get('mindbodyUser'),
-            password: this.configService.get('mindbodyPassword'),
-          });
+        const mindBodyTokenResponse = await this.createMindbodyToken();
+
+        if (mindBodyTokenResponse.status !== HttpStatus.CREATED) {
+          return {
+            status: mindBodyTokenResponse.status,
+            message: mindBodyTokenResponse.message,
+            token: null,
+            minbodyToken: null,
+            errors: mindBodyTokenResponse.errors,
+          };
+        }
 
         return {
           status: HttpStatus.CREATED,
           message: 'Token created successfully',
           token,
-          minbodyToken: data.AccessToken,
+          minbodyToken: mindBodyTokenResponse.minbodyToken,
           errors: null,
         };
       }
@@ -60,6 +67,44 @@ export class TokenController {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
         token: null,
+        errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('create_mind_body_token')
+  async createMindbodyToken(): Promise<CreateMindBodyTokenResponseDto> {
+    try {
+      const { data } =
+        await this.httpService.axiosRef.post<ICreateTokenMindBody>('/issue', {
+          username: this.configService.get('mindbodyUser'),
+          password: this.configService.get('mindbodyPassword'),
+        });
+
+      return {
+        status: HttpStatus.CREATED,
+        message: 'Token created successfully',
+        minbodyToken: data.AccessToken,
+        errors: null,
+      };
+    } catch (e) {
+      const { response, message } = e as AxiosError;
+
+      console.log(response);
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          minbodyToken: null,
+          message: message,
+          errors: e.errors,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        minbodyToken: null,
         errors: e.errors,
       };
     }

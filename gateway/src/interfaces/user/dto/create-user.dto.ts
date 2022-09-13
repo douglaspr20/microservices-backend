@@ -24,6 +24,7 @@ export class CreateUserDto {
 
   @IsString()
   @MinLength(2)
+  @MaxLength(2)
   State: string;
 
   @IsNumber()

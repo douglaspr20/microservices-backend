@@ -10,7 +10,7 @@ export interface IClient {
   ClientRelationships: null;
   FirstAppointmentDate: string;
   FirstName: string;
-  Id: string;
+  Id: number;
   IsCompany: boolean;
   IsProspect: boolean;
   LastName: string;

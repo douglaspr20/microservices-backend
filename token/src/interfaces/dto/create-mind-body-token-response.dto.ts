@@ -1,4 +1,4 @@
-export class ICreateMindBodyToken {
+export class CreateMindBodyTokenResponseDto {
   status: number;
   message: string;
   minbodyToken?: string;

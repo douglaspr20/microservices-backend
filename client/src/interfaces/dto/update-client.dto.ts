@@ -17,7 +17,7 @@ export class UpdateClientDto {
   Test?: boolean;
 
   @IsString()
-  authorization: string;
+  mindbodyauthorization: string;
 }
 
 export interface Client {

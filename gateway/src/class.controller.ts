@@ -42,13 +42,13 @@ export class ClassController {
   async getClasses(
     @Query('limit') limit: number,
     @Query('offset') offset: number,
-    @getRequestHeaderParam('authorization') param: string,
+    @getRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<GetClassesResponseDto> {
     const getClassesResponse: IGetClassesResponse = await firstValueFrom(
       this.classServiceClient.send('get_classes', {
         limit,
         offset,
-        authorization: param,
+        mindbodyauthorization: param,
       }),
     );
 
@@ -73,13 +73,13 @@ export class ClassController {
   @Get('classDescriptions')
   async getClassDescriptions(
     @Query() queryParams: getClassDescriptionDto,
-    @getRequestHeaderParam('authorization') param: string,
+    @getRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<GetClassDescriptionResponseDto> {
     const getClassDescriptionsResponse: IGetClassDescriptionResponse =
       await firstValueFrom(
         this.classServiceClient.send('class_descriptions', {
           ...queryParams,
-          authorization: param,
+          mindbodyauthorization: param,
         }),
       );
 
@@ -104,13 +104,13 @@ export class ClassController {
   @Post('addClientToClass')
   async addClientToClass(
     @Body() addClientToClassDto: AddClientToClassDto,
-    @getRequestHeaderParam('authorization') param: string,
+    @getRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<AddClientToClassResponseDto> {
     const addClientToClassResponse: IAddClientToClassResponse =
       await firstValueFrom(
         this.classServiceClient.send('add_client_to_class', {
           ...addClientToClassDto,
-          authorization: param,
+          mindbodyauthorization: param,
         }),
       );
 

@@ -41,12 +41,12 @@ export class ClientController {
   @Post('addClient')
   async addClient(
     @Body() createClientDto: CreateClientDto,
-    @getRequestHeaderParam('authorization') param: string,
+    @getRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<CreateClientResponseDto> {
     const createdClientResponse: IClientAddedResponse = await firstValueFrom(
       this.clientServiceClient.send('add_client', {
         ...createClientDto,
-        authorization: param,
+        mindbodyauthorization: param,
       }),
     );
 
@@ -73,14 +73,14 @@ export class ClientController {
     @Query('limit') limit: number,
     @Query('offset') offset: number,
     @Query('searchText') searchText: string,
-    @getRequestHeaderParam('authorization') param: string,
+    @getRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<GetClientsResponseDto> {
     const getClientsReponse: IGetClientsResponse = await firstValueFrom(
       this.clientServiceClient.send('get_clients', {
         limit,
         offset,
         searchText,
-        authorization: param,
+        mindbodyauthorization: param,
       }),
     );
 
@@ -105,12 +105,12 @@ export class ClientController {
   @Put('updateClient')
   async updateClient(
     @Body() updateClientDto: UpdateClientDto,
-    @getRequestHeaderParam('authorization') param: string,
+    @getRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<CreateClientResponseDto> {
     const updateClientResponse: IClientUpdateResponse = await firstValueFrom(
       this.clientServiceClient.send('update_client', {
         ...updateClientDto,
-        authorization: param,
+        mindBodyAuthorization: param,
       }),
     );
 
@@ -128,7 +128,6 @@ export class ClientController {
     return {
       message: updateClientResponse.message,
       data: updateClientResponse.data,
-
       errors: null,
     };
   }

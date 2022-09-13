@@ -29,5 +29,5 @@ export class GetClassesDto {
   clientId?: number;
 
   @IsString()
-  authorization: string;
+  mindbodyauthorization: string;
 }

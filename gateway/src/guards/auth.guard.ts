@@ -18,15 +18,15 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const { authorization, mindBodyAuthorization } = request.headers;
+    const { authorization, mindbodyauthorization } = request.headers;
 
     const userTokenInfo = await firstValueFrom(
       this.tokenServiceClient.send('validate_token', {
-        token: authorization,
+        token: authorization.replace('Bearer ', ''),
       }),
     );
 
-    if (!authorization || authorization === '' || !mindBodyAuthorization) {
+    if (!authorization || authorization === '' || !mindbodyauthorization) {
       return false;
     }
 

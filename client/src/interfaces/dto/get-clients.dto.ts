@@ -11,5 +11,5 @@ export class GetClientsDto {
   searchText?: string;
 
   @IsString()
-  authorization: string;
+  mindbodyauthorization: string;
 }

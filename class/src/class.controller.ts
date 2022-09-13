@@ -19,8 +19,8 @@ export class ClassController {
   async getClasses(
     @Body() getClassesDto: GetClassesDto,
   ): Promise<GetClassesResponseDto> {
-    const { authorization } = getClassesDto;
-    if (!authorization) {
+    const { mindbodyauthorization } = getClassesDto;
+    if (!mindbodyauthorization) {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Missing data for get Class Descriptions',
@@ -29,7 +29,7 @@ export class ClassController {
       };
     }
 
-    if (!authorization || authorization === '') {
+    if (!mindbodyauthorization || mindbodyauthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
         message: 'Forbidden',
@@ -39,7 +39,7 @@ export class ClassController {
     }
 
     this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      authorization;
+      mindbodyauthorization;
 
     this.httpService.axiosRef.defaults.params = {
       ...getClassesDto,
@@ -81,9 +81,9 @@ export class ClassController {
   async getClassDescriptions(
     @Body() getClassDescriptionDto: GetClassDescriptionDto,
   ): Promise<GetClassDescriptionResponseDto> {
-    const { authorization } = getClassDescriptionDto;
+    const { mindbodyauthorization } = getClassDescriptionDto;
 
-    if (!authorization) {
+    if (!mindbodyauthorization) {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Missing data for get Classes',
@@ -92,7 +92,7 @@ export class ClassController {
       };
     }
 
-    if (!authorization || authorization === '') {
+    if (!mindbodyauthorization || mindbodyauthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
         message: 'Forbidden',
@@ -102,7 +102,7 @@ export class ClassController {
     }
 
     this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      authorization;
+      mindbodyauthorization;
 
     this.httpService.axiosRef.defaults.params = {
       ...getClassDescriptionDto,
@@ -146,7 +146,7 @@ export class ClassController {
   async addClientToClass(
     @Body() addClientToClassDto: AddClientToClassDto,
   ): Promise<AddClientToClassResponseDto> {
-    const { authorization } = addClientToClassDto;
+    const { mindbodyauthorization } = addClientToClassDto;
 
     if (!addClientToClassDto) {
       return {
@@ -157,7 +157,7 @@ export class ClassController {
       };
     }
 
-    if (!authorization || authorization === '') {
+    if (!mindbodyauthorization || mindbodyauthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
         message: 'Forbidden',
@@ -167,7 +167,7 @@ export class ClassController {
     }
 
     this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      authorization;
+      mindbodyauthorization;
 
     try {
       const response = await this.httpService.axiosRef.post(
@@ -177,7 +177,7 @@ export class ClassController {
 
       return {
         status: HttpStatus.OK,
-        message: 'Cliebt Added',
+        message: 'Client Added',
         data: response.data,
         errors: null,
       };

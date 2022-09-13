@@ -5,9 +5,15 @@ import { UserController } from './user.controller';
 import { ClientController } from './client.controller';
 import { ClassController } from './class.controller';
 import { AppService } from './services/app.service';
+import { AppointmentController } from './appointment.controller';
 @Module({
   imports: [],
-  controllers: [UserController, ClientController, ClassController],
+  controllers: [
+    UserController,
+    ClientController,
+    ClassController,
+    AppointmentController,
+  ],
   providers: [
     ConfigService,
     {
@@ -39,6 +45,16 @@ import { AppService } from './services/app.service';
       useFactory: (configService: ConfigService) => {
         const classServiceOptions = configService.get('classService');
         return ClientProxyFactory.create(classServiceOptions);
+      },
+      inject: [ConfigService],
+    },
+
+    {
+      provide: 'APPOINTMENT_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        const appointmentServiceOptions =
+          configService.get('appointmentService');
+        return ClientProxyFactory.create(appointmentServiceOptions);
       },
       inject: [ConfigService],
     },

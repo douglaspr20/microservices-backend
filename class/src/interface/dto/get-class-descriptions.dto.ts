@@ -26,5 +26,5 @@ export class GetClassDescriptionDto {
   locationId?: number;
 
   @IsString()
-  authorization: string;
+  mindbodyauthorization: string;
 }

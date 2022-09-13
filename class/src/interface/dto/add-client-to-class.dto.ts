@@ -23,5 +23,5 @@ export class AddClientToClassDto {
   CrossRegionalBooking: boolean;
 
   @IsString()
-  authorization: string;
+  mindbodyauthorization: string;
 }

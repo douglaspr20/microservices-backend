@@ -2,7 +2,6 @@ import { Controller, Body, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { MessagePattern } from '@nestjs/microservices';
-import { ConfigService } from './services/config.service';
 import {
   CreateClientDto,
   CreateClientResponseDto,
@@ -15,16 +14,13 @@ import {
 
 @Controller()
 export class ClientController {
-  constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly httpService: HttpService) {}
 
   @MessagePattern('add_client')
   async addClient(
     @Body() createClientDto: CreateClientDto,
   ): Promise<CreateClientResponseDto> {
-    const { authorization } = createClientDto;
+    const { mindbodyauthorization } = createClientDto;
     if (!createClientDto) {
       return {
         status: HttpStatus.BAD_REQUEST,
@@ -34,7 +30,7 @@ export class ClientController {
       };
     }
 
-    if (!authorization || authorization === '') {
+    if (!mindbodyauthorization || mindbodyauthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
         message: 'Forbidden',
@@ -44,7 +40,7 @@ export class ClientController {
     }
 
     this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      authorization;
+      mindbodyauthorization;
 
     try {
       const response = await this.httpService.axiosRef.post(
@@ -87,11 +83,11 @@ export class ClientController {
     const {
       limit = 100,
       offset = 0,
-      authorization,
+      mindbodyauthorization,
       searchText = '',
     } = getclientsDto;
 
-    if (!authorization || authorization === '') {
+    if (!mindbodyauthorization || mindbodyauthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
         message: 'Forbidden',
@@ -101,7 +97,7 @@ export class ClientController {
     }
 
     this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      authorization;
+      mindbodyauthorization;
 
     this.httpService.axiosRef.defaults.params = {
       limit,
@@ -145,7 +141,7 @@ export class ClientController {
   async updateClient(
     @Body() updateClientDto: UpdateClientDto,
   ): Promise<CreateClientResponseDto> {
-    const { authorization } = updateClientDto;
+    const { mindbodyauthorization } = updateClientDto;
 
     if (!updateClientDto) {
       return {
@@ -156,7 +152,7 @@ export class ClientController {
       };
     }
 
-    if (!authorization || authorization === '') {
+    if (!mindbodyauthorization || mindbodyauthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
         message: 'Forbidden',
@@ -166,7 +162,7 @@ export class ClientController {
     }
 
     this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      authorization;
+      mindbodyauthorization;
 
     try {
       const response = await this.httpService.axiosRef.post(

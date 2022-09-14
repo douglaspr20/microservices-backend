@@ -2,17 +2,17 @@ import { HttpService } from '@nestjs/axios';
 import { Body, Controller, HttpStatus } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { AxiosError } from 'axios';
-import { GetProductResponseDto, GetProductsDto } from './interfaces';
+import { GetEnrrollmentsDto, GetEnrrollmentsResponseDto } from './interfaces';
 
 @Controller()
-export class SaleController {
+export class EnrrollmentController {
   constructor(private readonly httpService: HttpService) {}
 
-  @MessagePattern('get_products')
-  async getProducts(
-    @Body() getProductsDto: GetProductsDto,
-  ): Promise<GetProductResponseDto> {
-    const { mindbodyauthorization } = getProductsDto;
+  @MessagePattern('get_enrrollments')
+  async getEnrrollmnets(
+    @Body() getEnrrollmentsDto: GetEnrrollmentsDto,
+  ): Promise<GetEnrrollmentsResponseDto> {
+    const { mindbodyauthorization } = getEnrrollmentsDto;
 
     if (!mindbodyauthorization) {
       return {
@@ -36,15 +36,15 @@ export class SaleController {
       mindbodyauthorization;
 
     this.httpService.axiosRef.defaults.params = {
-      ...getProductsDto,
+      ...getEnrrollmentsDto,
     };
 
     try {
-      const response = await this.httpService.axiosRef.get(`/products`);
+      const response = await this.httpService.axiosRef.get(`/enrollments`);
 
       return {
         status: HttpStatus.OK,
-        message: 'Products Found',
+        message: 'Enrrollments Founds',
         data: response.data,
         errors: null,
       };

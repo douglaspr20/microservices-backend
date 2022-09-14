@@ -7,6 +7,7 @@ import {
   ClassController,
   ClientController,
   SaleController,
+  EnrrollmentController,
 } from './controllers';
 import { AppService } from './services/app.service';
 @Module({
@@ -17,6 +18,7 @@ import { AppService } from './services/app.service';
     ClassController,
     AppointmentController,
     SaleController,
+    EnrrollmentController,
   ],
   providers: [
     ConfigService,
@@ -68,6 +70,15 @@ import { AppService } from './services/app.service';
       useFactory: (configService: ConfigService) => {
         const saleServiceOptions = configService.get('saleService');
         return ClientProxyFactory.create(saleServiceOptions);
+      },
+      inject: [ConfigService],
+    },
+    {
+      provide: 'ENRROLLMENT_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        const enrrollmentServiceOptions =
+          configService.get('enrrollmentService');
+        return ClientProxyFactory.create(enrrollmentServiceOptions);
       },
       inject: [ConfigService],
     },

@@ -41,6 +41,14 @@ export class ConfigService {
       },
       transport: Transport.TCP,
     };
+
+    this.envConfig.saleService = {
+      options: {
+        port: process.env.SALE_SERVICE_PORT,
+        host: process.env.SALE_SERVICE_HOST,
+      },
+      transport: Transport.TCP,
+    };
   }
 
   get(key: string): any {

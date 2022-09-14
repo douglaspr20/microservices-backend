@@ -9,16 +9,22 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { AppService } from './services/app.service';
+import { AppService } from '../services/app.service';
 import {
   CreateUserDto,
   CreateUserResponseDto,
   IUserSearchResponse,
   IUserCreateResponse,
   LoginUserDto,
-} from './interfaces/user';
-import { ICreateMindBodyToken, ICreateTokenResponse } from './interfaces/token';
-import { IClientAddedResponse, IGetClientsResponse } from './interfaces/client';
+} from '../interfaces/user';
+import {
+  ICreateMindBodyToken,
+  ICreateTokenResponse,
+} from '../interfaces/token';
+import {
+  IClientAddedResponse,
+  IGetClientsResponse,
+} from '../interfaces/client';
 
 @Controller()
 export class UserController {

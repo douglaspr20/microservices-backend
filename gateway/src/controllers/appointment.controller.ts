@@ -10,13 +10,13 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { getRequestHeaderParam } from './decorators/getRequestHeaderParam.decorator';
-import { AuthGuard } from './guards/auth.guard';
+import { getRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
+import { AuthGuard } from '../guards/auth.guard';
 import {
   AddAppointmentDto,
   IAppointmentAddedResponse,
-} from './interfaces/appointment';
-import { AppService } from './services/app.service';
+} from '../interfaces/appointment';
+import { AppService } from '../services/app.service';
 
 @UseGuards(AuthGuard)
 @Controller('appointment')

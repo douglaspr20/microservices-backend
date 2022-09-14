@@ -12,8 +12,8 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { getRequestHeaderParam } from './decorators/getRequestHeaderParam.decorator';
-import { AuthGuard } from './guards/auth.guard';
+import { getRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
+import { AuthGuard } from '../guards/auth.guard';
 import {
   CreateClientDto,
   CreateClientResponseDto,
@@ -21,9 +21,9 @@ import {
   IClientAddedResponse,
   IGetClientsResponse,
   UpdateClientDto,
-} from './interfaces/client';
-import { IClientUpdateResponse } from './interfaces/client/updateClientResponse.interface';
-import { AppService } from './services/app.service';
+  IClientUpdateResponse,
+} from '../interfaces/client';
+import { AppService } from '../services/app.service';
 
 @UseGuards(AuthGuard)
 @Controller('client')

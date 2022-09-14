@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ClientProxyFactory } from '@nestjs/microservices';
 import { ConfigService } from './services/config.service';
-import { UserController } from './user.controller';
-import { ClientController } from './client.controller';
-import { ClassController } from './class.controller';
+import {
+  UserController,
+  AppointmentController,
+  ClassController,
+  ClientController,
+  SaleController,
+} from './controllers';
 import { AppService } from './services/app.service';
-import { AppointmentController } from './appointment.controller';
 @Module({
   imports: [],
   controllers: [
@@ -13,6 +16,7 @@ import { AppointmentController } from './appointment.controller';
     ClientController,
     ClassController,
     AppointmentController,
+    SaleController,
   ],
   providers: [
     ConfigService,
@@ -55,6 +59,15 @@ import { AppointmentController } from './appointment.controller';
         const appointmentServiceOptions =
           configService.get('appointmentService');
         return ClientProxyFactory.create(appointmentServiceOptions);
+      },
+      inject: [ConfigService],
+    },
+
+    {
+      provide: 'SALE_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        const saleServiceOptions = configService.get('saleService');
+        return ClientProxyFactory.create(saleServiceOptions);
       },
       inject: [ConfigService],
     },

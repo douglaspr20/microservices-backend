@@ -11,9 +11,9 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { getRequestHeaderParam } from './decorators/getRequestHeaderParam.decorator';
-import { AppService } from './services/app.service';
-import { AuthGuard } from './guards/auth.guard';
+import { getRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
+import { AppService } from '../services/app.service';
+import { AuthGuard } from '../guards/auth.guard';
 import {
   AddClientToClassDto,
   AddClientToClassResponseDto,
@@ -22,8 +22,8 @@ import {
   GetClassesResponseDto,
   IGetClassDescriptionResponse,
   IGetClassesResponse,
-} from './interfaces/class';
-import { IAddClientToClassResponse } from './interfaces/class/addClientToClassResponse.interface';
+  IAddClientToClassResponse,
+} from '../interfaces/class';
 
 @UseGuards(AuthGuard)
 @Controller('class')

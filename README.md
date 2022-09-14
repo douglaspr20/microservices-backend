@@ -18,13 +18,14 @@ Jyzen Api created with NestJs
 you can find which environment variables are used by the project in the `env.template` file
 rename to .env
 
-## Installation Project
+## Install Dependencies and run gateway and microservices
 
-```
+For the moment, while I solve the problem with docker, the way to run the different microservices and the gateway is:
+
+````
+$ cd gatetway/microservicename
+
 $ yarn install
-```
-
-## Running the app
 
 ```bash
 # development
@@ -35,4 +36,4 @@ $ yarn start:dev
 
 # production mode
 $ yarn start:prod
-```
+````

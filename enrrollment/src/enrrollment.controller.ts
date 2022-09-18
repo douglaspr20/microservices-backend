@@ -26,7 +26,7 @@ export class EnrrollmentController {
     if (!mindbodyauthorization || mindbodyauthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
-        message: 'Forbidden',
+        message: 'forbidden resource',
         data: null,
         errors: null,
       };

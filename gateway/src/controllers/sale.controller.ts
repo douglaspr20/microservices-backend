@@ -9,7 +9,8 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { GetRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
+import { GetUserRequest } from '../decorators';
+import { IUser } from '../interfaces/user';
 import { AuthGuard } from '../guards/auth.guard';
 import {
   GetProductResponseDto,
@@ -19,7 +20,7 @@ import {
 import { AppService } from '../services/app.service';
 
 @UseGuards(AuthGuard)
-@Controller('sale')
+@Controller('sales')
 export class SaleController {
   constructor(
     private readonly appService: AppService,
@@ -35,12 +36,12 @@ export class SaleController {
   @Get('products')
   async getProducts(
     @Query() queryParams: GetProductsDto,
-    @GetRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetUserRequest() user: IUser,
   ): Promise<GetProductResponseDto> {
     const getProductsResponse: IGetProductResponse = await firstValueFrom(
       this.saleServiceClient.send('get_products', {
         ...queryParams,
-        mindbodyauthorization: param,
+        mindBodyAuthorization: user.MindBodyToken,
       }),
     );
 

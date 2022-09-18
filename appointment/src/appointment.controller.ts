@@ -3,6 +3,7 @@ import { MessagePattern } from '@nestjs/microservices';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { AddAppointmentDto, AddAppointmentResponseDto } from './interfaces';
+import { MindBodyErrorResponse } from './types';
 
 @Controller()
 export class AppointmentController {
@@ -12,7 +13,7 @@ export class AppointmentController {
   async addClientToClass(
     @Body() addAppointmentDto: AddAppointmentDto,
   ): Promise<AddAppointmentResponseDto> {
-    const { mindbodyauthorization } = addAppointmentDto;
+    const { mindBodyAuthorization } = addAppointmentDto;
 
     if (!addAppointmentDto) {
       return {
@@ -23,17 +24,17 @@ export class AppointmentController {
       };
     }
 
-    if (!mindbodyauthorization || mindbodyauthorization === '') {
+    if (!mindBodyAuthorization || mindBodyAuthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
-        message: 'Forbidden',
+        message: 'forbidden resource',
         data: null,
         errors: null,
       };
     }
 
     this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      mindbodyauthorization;
+      mindBodyAuthorization;
 
     try {
       const response = await this.httpService.axiosRef.post(
@@ -48,7 +49,9 @@ export class AppointmentController {
         errors: null,
       };
     } catch (e) {
-      const { response, message } = e as AxiosError;
+      const { response } = e as AxiosError;
+
+      const { Error } = response.data as MindBodyErrorResponse;
 
       console.log(response);
 
@@ -56,7 +59,7 @@ export class AppointmentController {
         return {
           status: response.status,
           data: null,
-          message: message,
+          message: Error.Message,
           errors: e.errors,
         };
       }

@@ -8,11 +8,13 @@ import {
   Post,
   Put,
   Query,
+  Param,
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { GetRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
+import { GetUserRequest } from '../decorators';
+import { IUser } from '../interfaces/user';
 import { AuthGuard } from '../guards/auth.guard';
 import {
   CreateClientDto,
@@ -26,27 +28,22 @@ import {
 import { AppService } from '../services/app.service';
 
 @UseGuards(AuthGuard)
-@Controller('client')
+@Controller('clients')
 export class ClientController {
   constructor(
     private readonly appService: AppService,
     @Inject('CLIENT_SERVICE') private readonly clientServiceClient: ClientProxy,
   ) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello('client');
-  }
-
-  @Post('addClient')
+  @Post()
   async addClient(
     @Body() createClientDto: CreateClientDto,
-    @GetRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetUserRequest() user: IUser,
   ): Promise<CreateClientResponseDto> {
     const createdClientResponse: IClientAddedResponse = await firstValueFrom(
       this.clientServiceClient.send('add_client', {
         ...createClientDto,
-        mindbodyauthorization: param,
+        mindbodyauthorization: user.MindBodyToken,
       }),
     );
 
@@ -68,19 +65,19 @@ export class ClientController {
     };
   }
 
-  @Get('clients')
+  @Get()
   async getClients(
     @Query('limit') limit: number,
     @Query('offset') offset: number,
     @Query('searchText') searchText: string,
-    @GetRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetUserRequest() user: IUser,
   ): Promise<GetClientsResponseDto> {
     const getClientsReponse: IGetClientsResponse = await firstValueFrom(
       this.clientServiceClient.send('get_clients', {
         limit,
         offset,
         searchText,
-        mindbodyauthorization: param,
+        mindbodyauthorization: user.MindBodyToken,
       }),
     );
 
@@ -102,15 +99,47 @@ export class ClientController {
     };
   }
 
-  @Put('updateClient')
+  @Get(':clientId')
+  async getClientById(
+    @Param('clientId') clientId: number,
+    @GetUserRequest() user: IUser,
+  ): Promise<any> {
+    const getClientReponse: IGetClientsResponse = await firstValueFrom(
+      this.clientServiceClient.send('get_client_by_id', {
+        clientId,
+        mindbodyauthorization: user.MindBodyToken,
+      }),
+    );
+
+    if (getClientReponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getClientReponse.message,
+          data: null,
+          errors: getClientReponse.errors,
+        },
+        getClientReponse.status,
+      );
+    }
+
+    return {
+      message: getClientReponse.message,
+      data: getClientReponse.data,
+      errors: null,
+    };
+  }
+
+  @Put(':clientId')
   async updateClient(
+    @Param('clientId') clientId: number,
     @Body() updateClientDto: UpdateClientDto,
-    @GetRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetUserRequest() user: IUser,
   ): Promise<CreateClientResponseDto> {
     const updateClientResponse: IClientUpdateResponse = await firstValueFrom(
       this.clientServiceClient.send('update_client', {
         ...updateClientDto,
-        mindBodyAuthorization: param,
+        clientId,
+        mindBodyAuthorization: user.MindBodyToken,
       }),
     );
 

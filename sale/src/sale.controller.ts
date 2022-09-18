@@ -3,6 +3,7 @@ import { Body, Controller, HttpStatus } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { AxiosError } from 'axios';
 import { GetProductResponseDto, GetProductsDto } from './interfaces';
+import { MindBodyErrorResponse } from './types';
 
 @Controller()
 export class SaleController {
@@ -12,19 +13,19 @@ export class SaleController {
   async getProducts(
     @Body() getProductsDto: GetProductsDto,
   ): Promise<GetProductResponseDto> {
-    const { mindbodyauthorization } = getProductsDto;
+    const { mindBodyAuthorization } = getProductsDto;
 
-    if (!mindbodyauthorization || mindbodyauthorization === '') {
+    if (!mindBodyAuthorization || mindBodyAuthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
-        message: 'Forbidden',
+        message: 'forbidden resource',
         data: null,
         errors: null,
       };
     }
 
     this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      mindbodyauthorization;
+      mindBodyAuthorization;
 
     this.httpService.axiosRef.defaults.params = {
       ...getProductsDto,
@@ -40,7 +41,9 @@ export class SaleController {
         errors: null,
       };
     } catch (e) {
-      const { response, message } = e as AxiosError;
+      const { response } = e as AxiosError;
+
+      const { Error } = response.data as MindBodyErrorResponse;
 
       console.log(response);
 
@@ -48,7 +51,7 @@ export class SaleController {
         return {
           status: response.status,
           data: null,
-          message: message,
+          message: Error.Message,
           errors: e.errors,
         };
       }

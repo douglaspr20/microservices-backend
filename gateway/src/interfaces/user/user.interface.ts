@@ -6,4 +6,6 @@ export interface IUser {
   State: string;
   WorkPhone: number;
   Birthdate: string;
+  MindBodyToken?: string;
+  MindBodyClientId: number;
 }

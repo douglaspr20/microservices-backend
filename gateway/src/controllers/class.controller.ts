@@ -11,8 +11,6 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { GetRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
-import { AppService } from '../services/app.service';
 import { AuthGuard } from '../guards/auth.guard';
 import {
   AddClientToClassDto,
@@ -24,31 +22,27 @@ import {
   IGetClassesResponse,
   IAddClientToClassResponse,
 } from '../interfaces/class';
+import { IUser } from '../interfaces/user';
+import { GetUserRequest } from '../decorators';
 
 @UseGuards(AuthGuard)
-@Controller('class')
+@Controller('classes')
 export class ClassController {
   constructor(
-    private readonly appService: AppService,
     @Inject('CLASS_SERVICE') private readonly classServiceClient: ClientProxy,
   ) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello('class');
-  }
-
-  @Get('classes')
   async getClasses(
     @Query('limit') limit: number,
     @Query('offset') offset: number,
-    @GetRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetUserRequest() user: IUser,
   ): Promise<GetClassesResponseDto> {
     const getClassesResponse: IGetClassesResponse = await firstValueFrom(
       this.classServiceClient.send('get_classes', {
         limit,
         offset,
-        mindbodyauthorization: param,
+        mindBodyAuthorization: user.MindBodyToken,
       }),
     );
 
@@ -73,13 +67,13 @@ export class ClassController {
   @Get('classDescriptions')
   async getClassDescriptions(
     @Query() queryParams: getClassDescriptionDto,
-    @GetRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetUserRequest() user: IUser,
   ): Promise<GetClassDescriptionResponseDto> {
     const getClassDescriptionsResponse: IGetClassDescriptionResponse =
       await firstValueFrom(
         this.classServiceClient.send('class_descriptions', {
           ...queryParams,
-          mindbodyauthorization: param,
+          mindBodyAuthorization: user.MindBodyToken,
         }),
       );
 
@@ -104,13 +98,13 @@ export class ClassController {
   @Post('addClientToClass')
   async addClientToClass(
     @Body() addClientToClassDto: AddClientToClassDto,
-    @GetRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetUserRequest() user: IUser,
   ): Promise<AddClientToClassResponseDto> {
     const addClientToClassResponse: IAddClientToClassResponse =
       await firstValueFrom(
         this.classServiceClient.send('add_client_to_class', {
           ...addClientToClassDto,
-          mindbodyauthorization: param,
+          mindBodyAuthorization: user.MindBodyToken,
         }),
       );
 

@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { getRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
+import { GetRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
 import { AppService } from '../services/app.service';
 import { AuthGuard } from '../guards/auth.guard';
 import {
@@ -42,7 +42,7 @@ export class ClassController {
   async getClasses(
     @Query('limit') limit: number,
     @Query('offset') offset: number,
-    @getRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<GetClassesResponseDto> {
     const getClassesResponse: IGetClassesResponse = await firstValueFrom(
       this.classServiceClient.send('get_classes', {
@@ -73,7 +73,7 @@ export class ClassController {
   @Get('classDescriptions')
   async getClassDescriptions(
     @Query() queryParams: getClassDescriptionDto,
-    @getRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<GetClassDescriptionResponseDto> {
     const getClassDescriptionsResponse: IGetClassDescriptionResponse =
       await firstValueFrom(
@@ -104,7 +104,7 @@ export class ClassController {
   @Post('addClientToClass')
   async addClientToClass(
     @Body() addClientToClassDto: AddClientToClassDto,
-    @getRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<AddClientToClassResponseDto> {
     const addClientToClassResponse: IAddClientToClassResponse =
       await firstValueFrom(

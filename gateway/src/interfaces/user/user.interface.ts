@@ -6,5 +6,4 @@ export interface IUser {
   State: string;
   WorkPhone: number;
   Birthdate: string;
-  Role: string;
 }

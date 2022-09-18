@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto, LoginUserDto } from '../interfaces';
+import { CreateUserDto, LoginUserDto, UpdateUserDto } from '../interfaces';
 import { User } from '../entities/user.entity';
 
 @Injectable()
@@ -21,6 +21,9 @@ export class UserService {
 
     await this.userRepository.save(newUser);
 
+    delete newUser.MindBodyToken;
+    delete newUser.Password;
+
     return {
       ...newUser,
     };
@@ -31,19 +34,21 @@ export class UserService {
 
     const user = await this.userRepository.findOne({
       where: { Email },
-      select: { id: true, Email: true, Password: true },
     });
 
-    if (!bcrypt.compareSync(Password, user.Password)) {
+    if (!user || !bcrypt.compareSync(Password, user.Password)) {
       return false;
     }
+
+    delete user.MindBodyToken;
+    delete user.Password;
 
     return {
       ...user,
     };
   }
 
-  async searchUserByEmail(Email: string) {
+  async searchUserByEmail(Email: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: {
         Email,
@@ -53,9 +58,26 @@ export class UserService {
     return user;
   }
 
-  async searchUserById(id: number) {
+  async searchUserById(id: number): Promise<User> {
     const user = await this.userRepository.findOneBy({ id });
 
     return user;
+  }
+
+  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const userToUpdate = await this.userRepository.findOneBy({ id });
+
+    if (!userToUpdate) {
+      return null;
+    }
+
+    const result = await this.userRepository.update(
+      { id },
+      {
+        ...updateUserDto,
+      },
+    );
+
+    return result.raw;
   }
 }

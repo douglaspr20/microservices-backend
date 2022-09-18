@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { getRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
+import { GetRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
 import { AuthGuard } from '../guards/auth.guard';
 import {
   AddAppointmentDto,
@@ -35,7 +35,7 @@ export class AppointmentController {
   @Post('addAppointment')
   async addAppointment(
     @Body() addAppointmentDto: AddAppointmentDto,
-    @getRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetRequestHeaderParam('mindbodyauthorization') param: string,
   ) {
     const addAppoimentResponse: IAppointmentAddedResponse =
       await firstValueFrom(

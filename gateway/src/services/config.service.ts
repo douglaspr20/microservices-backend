@@ -6,6 +6,7 @@ export class ConfigService {
   constructor() {
     this.envConfig = {};
     this.envConfig.port = process.env.API_GATEWAY_PORT;
+    this.envConfig.secret = process.env.SECRET;
     this.envConfig.userService = {
       options: {
         port: process.env.USER_SERVICE_PORT,

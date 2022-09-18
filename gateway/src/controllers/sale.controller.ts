@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { getRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
+import { GetRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
 import { AuthGuard } from '../guards/auth.guard';
 import {
   GetProductResponseDto,
@@ -35,7 +35,7 @@ export class SaleController {
   @Get('products')
   async getProducts(
     @Query() queryParams: GetProductsDto,
-    @getRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<GetProductResponseDto> {
     const getProductsResponse: IGetProductResponse = await firstValueFrom(
       this.saleServiceClient.send('get_products', {

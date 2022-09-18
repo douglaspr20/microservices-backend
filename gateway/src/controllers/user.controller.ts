@@ -6,6 +6,7 @@ import {
   Post,
   HttpStatus,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -13,18 +14,16 @@ import { AppService } from '../services/app.service';
 import {
   CreateUserDto,
   CreateUserResponseDto,
-  IUserSearchResponse,
   IUserCreateResponse,
-  LoginUserDto,
+  IUser,
 } from '../interfaces/user';
-import {
-  ICreateMindBodyToken,
-  ICreateTokenResponse,
-} from '../interfaces/token';
+import { ICreateMindBodyToken } from '../interfaces/token';
 import {
   IClientAddedResponse,
   IGetClientsResponse,
 } from '../interfaces/client';
+import { LocalAuthGuard } from '../guards';
+import { GetUserRequest } from '../decorators';
 
 @Controller()
 export class UserController {
@@ -103,6 +102,7 @@ export class UserController {
       this.userServiceClient.send('user_register', {
         ...createUserDto,
         MindBodyClientId: minbodyClientId,
+        MindBodyToken: minbodyToken,
       }),
     );
 
@@ -117,52 +117,48 @@ export class UserController {
       );
     }
 
-    const createTokenResponse: ICreateTokenResponse = await firstValueFrom(
-      this.tokenServiceClient.send('create_token', {
-        userId: registerUserReponse.user.id,
-      }),
-    );
-
     return {
       message: registerUserReponse.message,
       data: {
         user: registerUserReponse.user,
-        authorization: createTokenResponse.token,
-        mindBodyAuthorization: minbodyToken,
       },
       errors: null,
     };
   }
 
+  @UseGuards(LocalAuthGuard)
   @Post('/auth/login')
-  async login(@Body() userInfo: LoginUserDto): Promise<CreateUserResponseDto> {
-    const getUserResponse: IUserSearchResponse = await firstValueFrom(
-      this.userServiceClient.send('user_login', userInfo),
-    );
+  async login(@GetUserRequest() user: IUser): Promise<CreateUserResponseDto> {
+    const createMindBodyTokenResponse: ICreateMindBodyToken =
+      await firstValueFrom(
+        this.tokenServiceClient.send('create_mind_body_token', {}),
+      );
+    const { minbodyToken } = createMindBodyTokenResponse;
 
-    if (getUserResponse.status !== HttpStatus.OK) {
+    if (createMindBodyTokenResponse.status !== HttpStatus.CREATED) {
       throw new HttpException(
         {
-          message: getUserResponse.message,
+          message: createMindBodyTokenResponse.message,
           data: null,
-          errors: null,
+          errors: createMindBodyTokenResponse.errors,
         },
-        getUserResponse.status,
+        createMindBodyTokenResponse.status,
       );
     }
 
-    const createTokenResponse: ICreateTokenResponse = await firstValueFrom(
-      this.tokenServiceClient.send('create_token', {
-        userId: getUserResponse.user.id,
-      }),
+    Promise.resolve(
+      firstValueFrom(
+        this.userServiceClient.send('update_user', {
+          id: user.id,
+          MindBodyToken: minbodyToken,
+        }),
+      ),
     );
 
     return {
-      message: getUserResponse.message,
+      message: 'Login successfully',
       data: {
-        user: getUserResponse.user,
-        authorization: createTokenResponse.token,
-        mindBodyAuthorization: createTokenResponse.minbodyToken,
+        user,
       },
       errors: null,
     };

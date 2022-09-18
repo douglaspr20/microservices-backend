@@ -12,17 +12,15 @@ export class User {
   id: number;
 
   @Column('text')
-  Email: string;
-
-  @Column('text')
   FirstName: string;
 
   @Column('text')
   LastName: string;
 
-  @Column('text', {
-    select: false,
-  })
+  @Column('text')
+  Email: string;
+
+  @Column('text')
   Password: string;
 
   @Column('text')
@@ -35,9 +33,9 @@ export class User {
   Birthdate: string;
 
   @Column('text', {
-    default: 'user',
+    nullable: true,
   })
-  Role: string;
+  MindBodyToken: string;
 
   @Column('int')
   MindBodyClientId: number;

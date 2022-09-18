@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { getRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
+import { GetRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
 import { AuthGuard } from '../guards/auth.guard';
 import {
   GetEnrrollmentsDto,
@@ -35,7 +35,7 @@ export class EnrrollmentController {
   @Get('enrollments')
   async getEnrrollmnets(
     @Query() queryParams: GetEnrrollmentsDto,
-    @getRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<GetEnrrollmentsResponseDto> {
     const getEnrrollmentsResponse: IGetEnrrollmentResponse =
       await firstValueFrom(

@@ -14,15 +14,6 @@ export class SaleController {
   ): Promise<GetProductResponseDto> {
     const { mindbodyauthorization } = getProductsDto;
 
-    if (!mindbodyauthorization) {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'Missing data for get Products',
-        data: null,
-        errors: null,
-      };
-    }
-
     if (!mindbodyauthorization || mindbodyauthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,

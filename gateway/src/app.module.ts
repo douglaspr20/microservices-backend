@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
 import { ClientProxyFactory } from '@nestjs/microservices';
 import { ConfigService } from './services/config.service';
 import {
@@ -10,8 +11,10 @@ import {
   EnrrollmentController,
 } from './controllers';
 import { AppService } from './services/app.service';
+import { LocalStrategy } from './strategies/local.strategy';
+import { SessionSerializer } from './serializer/session.serializer';
 @Module({
-  imports: [],
+  imports: [PassportModule.register({ session: true })],
   controllers: [
     UserController,
     ClientController,
@@ -83,6 +86,8 @@ import { AppService } from './services/app.service';
       inject: [ConfigService],
     },
     AppService,
+    LocalStrategy,
+    SessionSerializer,
   ],
 })
 export class AppModule {}

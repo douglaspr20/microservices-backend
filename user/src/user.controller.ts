@@ -8,6 +8,7 @@ import {
   IUserCreateResponse,
   LoginUserDto,
   GetUserByIdDto,
+  UpdateUserDto,
 } from './interfaces';
 
 @Controller('user')
@@ -103,7 +104,48 @@ export class UserController {
       };
     }
 
-    const user = await this.userService.searchUserById(getUserByIdDto.userId);
+    try {
+      const user = await this.userService.searchUserById(getUserByIdDto.userId);
+
+      if (!user) {
+        return {
+          status: HttpStatus.NOT_FOUND,
+          message: 'User not found',
+          user: null,
+        };
+      }
+
+      return {
+        status: HttpStatus.OK,
+        message: 'User login successfully',
+        user: user,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        user: null,
+        errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('update_user')
+  async updateUser(
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<IUserSearchResponse> {
+    if (!updateUserDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Bad request, data missing',
+        user: null,
+      };
+    }
+
+    const { id } = updateUserDto;
+
+    const user = await this.userService.updateUser(id, updateUserDto);
 
     if (!user) {
       return {
@@ -115,7 +157,7 @@ export class UserController {
 
     return {
       status: HttpStatus.OK,
-      message: 'User login successfully',
+      message: 'User updated successfully',
       user: user,
     };
   }

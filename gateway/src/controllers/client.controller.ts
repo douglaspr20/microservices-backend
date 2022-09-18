@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { getRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
+import { GetRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
 import { AuthGuard } from '../guards/auth.guard';
 import {
   CreateClientDto,
@@ -41,7 +41,7 @@ export class ClientController {
   @Post('addClient')
   async addClient(
     @Body() createClientDto: CreateClientDto,
-    @getRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<CreateClientResponseDto> {
     const createdClientResponse: IClientAddedResponse = await firstValueFrom(
       this.clientServiceClient.send('add_client', {
@@ -73,7 +73,7 @@ export class ClientController {
     @Query('limit') limit: number,
     @Query('offset') offset: number,
     @Query('searchText') searchText: string,
-    @getRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<GetClientsResponseDto> {
     const getClientsReponse: IGetClientsResponse = await firstValueFrom(
       this.clientServiceClient.send('get_clients', {
@@ -105,7 +105,7 @@ export class ClientController {
   @Put('updateClient')
   async updateClient(
     @Body() updateClientDto: UpdateClientDto,
-    @getRequestHeaderParam('mindbodyauthorization') param: string,
+    @GetRequestHeaderParam('mindbodyauthorization') param: string,
   ): Promise<CreateClientResponseDto> {
     const updateClientResponse: IClientUpdateResponse = await firstValueFrom(
       this.clientServiceClient.send('update_client', {

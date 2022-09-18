@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   Inject,
   Post,
   HttpStatus,
@@ -10,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { AppService } from '../services/app.service';
 import {
   CreateUserDto,
   CreateUserResponseDto,
@@ -28,17 +26,12 @@ import { GetUserRequest } from '../decorators';
 @Controller()
 export class UserController {
   constructor(
-    private readonly appService: AppService,
     @Inject('CLIENT_SERVICE') private readonly clientServiceClient: ClientProxy,
     @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
   ) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
-
+  // @UseGuards(LocalAuthGuard)
   @Post('/auth/register')
   async register(
     @Body() createUserDto: CreateUserDto,

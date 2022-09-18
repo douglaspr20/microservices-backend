@@ -11,6 +11,7 @@ import {
   GetClientsResponseDto,
   UpdateClientDto,
 } from './interfaces';
+import { MindBodyErrorResponse } from './types';
 
 @Controller()
 export class ClientController {
@@ -33,7 +34,8 @@ export class ClientController {
     if (!mindbodyauthorization || mindbodyauthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
-        message: 'Forbidden',
+        message: 'forbidden resource',
+
         data: null,
         errors: null,
       };
@@ -55,14 +57,16 @@ export class ClientController {
         errors: null,
       };
     } catch (e) {
-      const { response, message } = e as AxiosError;
+      const { response } = e as AxiosError;
+
+      const { Error } = response.data as MindBodyErrorResponse;
 
       console.log(response);
       if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
         return {
           status: response.status,
           data: null,
-          message: message,
+          message: Error.Message,
           errors: e.errors,
         };
       }
@@ -90,7 +94,7 @@ export class ClientController {
     if (!mindbodyauthorization || mindbodyauthorization === '') {
       return {
         status: HttpStatus.FORBIDDEN,
-        message: 'Forbidden',
+        message: 'forbidden resource',
         data: null,
         errors: null,
       };
@@ -115,80 +119,21 @@ export class ClientController {
         errors: null,
       };
     } catch (e) {
-      const { response, message } = e as AxiosError;
+      const { response } = e as AxiosError;
 
       console.log(response);
+
+      const { Error } = response.data as MindBodyErrorResponse;
 
       if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
         return {
           status: response.status,
           data: null,
-          message: message,
+          message: Error.Message,
           errors: e.errors,
         };
       }
 
-      return {
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Something went wrong',
-        data: null,
-        errors: e.errors,
-      };
-    }
-  }
-
-  @MessagePattern('update_client')
-  async updateClient(
-    @Body() updateClientDto: UpdateClientDto,
-  ): Promise<CreateClientResponseDto> {
-    const { mindbodyauthorization } = updateClientDto;
-
-    if (!updateClientDto) {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'Missing data for update client',
-        data: null,
-        errors: null,
-      };
-    }
-
-    if (!mindbodyauthorization || mindbodyauthorization === '') {
-      return {
-        status: HttpStatus.FORBIDDEN,
-        message: 'Forbidden',
-        data: null,
-        errors: null,
-      };
-    }
-
-    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      mindbodyauthorization;
-
-    try {
-      const response = await this.httpService.axiosRef.post(
-        `/updateclient`,
-        updateClientDto,
-      );
-
-      return {
-        status: HttpStatus.OK,
-        message: 'Client Updated Successfully',
-        data: response.data.Client,
-        errors: null,
-      };
-    } catch (e) {
-      const { response, message } = e as AxiosError;
-
-      console.log(response);
-
-      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
-        return {
-          status: response.status,
-          data: null,
-          message: message,
-          errors: e.errors,
-        };
-      }
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
@@ -220,7 +165,9 @@ export class ClientController {
         errors: null,
       };
     } catch (e) {
-      const { response, message } = e as AxiosError;
+      const { response } = e as AxiosError;
+
+      const { Error } = response.data as MindBodyErrorResponse;
 
       console.log(response);
 
@@ -228,11 +175,77 @@ export class ClientController {
         return {
           status: response.status,
           data: null,
-          message: message,
+          message: Error.Message,
           errors: e.errors,
         };
       }
 
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        data: null,
+        errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('update_client')
+  async updateClient(
+    @Body() updateClientDto: UpdateClientDto,
+  ): Promise<CreateClientResponseDto> {
+    const { mindBodyAuthorization, clientId } = updateClientDto;
+
+    if (!updateClientDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Missing data for update client',
+        data: null,
+        errors: null,
+      };
+    }
+
+    if (!mindBodyAuthorization || mindBodyAuthorization === '') {
+      return {
+        status: HttpStatus.FORBIDDEN,
+        message: 'forbidden resource',
+        data: null,
+        errors: null,
+      };
+    }
+
+    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
+      mindBodyAuthorization;
+
+    try {
+      const response = await this.httpService.axiosRef.post(`/updateclient`, {
+        ...updateClientDto,
+        Client: {
+          ...updateClientDto.Client,
+          Id: clientId,
+        },
+      });
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Client Updated Successfully',
+        data: response.data.Client,
+        errors: null,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      const { Error } = response.data as MindBodyErrorResponse;
+
+      console.log(response);
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          data: null,
+          message: Error.Message,
+          errors: e.errors,
+        };
+      }
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',

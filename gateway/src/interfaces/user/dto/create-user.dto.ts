@@ -5,7 +5,6 @@ import {
   MaxLength,
   Matches,
   IsNumber,
-  IsDateString,
   Min,
 } from 'class-validator';
 
@@ -33,7 +32,7 @@ export class CreateUserDto {
   })
   WorkPhone: number;
 
-  @IsDateString()
+  @IsString()
   Birthdate: string;
 
   @IsString()

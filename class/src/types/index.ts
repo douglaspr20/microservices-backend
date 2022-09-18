@@ -1,0 +1,1 @@
+export * from './mindBodyReponseError.type';

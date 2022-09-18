@@ -26,5 +26,5 @@ export class AddAppointmentDto {
   StartDateTime: string;
 
   @IsString()
-  mindbodyauthorization: string;
+  mindBodyAuthorization: string;
 }

@@ -19,7 +19,7 @@ import {
 import { AppService } from '../services/app.service';
 
 @UseGuards(AuthGuard)
-@Controller('enrrollment')
+@Controller('enrrollments')
 export class EnrrollmentController {
   constructor(
     private readonly appService: AppService,
@@ -32,7 +32,7 @@ export class EnrrollmentController {
     return this.appService.getHello('appointment');
   }
 
-  @Get('enrollments')
+  @Get()
   async getEnrrollmnets(
     @Query() queryParams: GetEnrrollmentsDto,
     @GetRequestHeaderParam('mindbodyauthorization') param: string,

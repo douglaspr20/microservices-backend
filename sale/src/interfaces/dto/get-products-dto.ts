@@ -30,5 +30,5 @@ export class GetProductsDto {
   locationId?: number;
 
   @IsString()
-  mindbodyauthorization: string;
+  mindBodyAuthorization: string;
 }

@@ -85,6 +85,15 @@ import { SessionSerializer } from './serializer/session.serializer';
       },
       inject: [ConfigService],
     },
+
+    {
+      provide: 'PATIENT_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        const patientServiceOptions = configService.get('patientService');
+        return ClientProxyFactory.create(patientServiceOptions);
+      },
+      inject: [ConfigService],
+    },
     AppService,
     LocalStrategy,
     SessionSerializer,

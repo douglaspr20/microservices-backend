@@ -5,9 +5,9 @@ export class ConfigService {
     this.envConfig = {
       host: process.env.PATIENT_SERVICE_HOST,
       port: process.env.PATIENT_SERVICE_PORT,
-      cerboBaseUrl: process.env.MINDBODY_BASE_URL,
+      cerboBaseUrl: process.env.CERBO_BASEURL,
       cerboUsername: process.env.CERBO_USERNAME,
-      secretKey: process.env.CERBO_SECRET_KEY,
+      cerboSecretKey: process.env.CERBO_SECRET_KEY,
     };
   }
 

@@ -10,18 +10,11 @@ import { PatientService } from './services/patient.service';
     ConfigModule,
     HttpModule.registerAsync({
       useFactory: async (configService: ConfigService) => {
-        const auth =
-          'Basic ' +
-          Buffer.from(
-            configService.get('cerboUsername') +
-              ':' +
-              configService.get('secretKey'),
-          ).toString('base64');
-
         return {
-          baseURL: `${configService.get('cerboBaseUrl')}/patients`,
-          headers: {
-            Authorization: auth,
+          baseURL: `${configService.get('cerboBaseUrl')}`,
+          auth: {
+            username: configService.get('cerboUsername'),
+            password: configService.get('cerboSecretKey'),
           },
         };
       },

@@ -9,6 +9,7 @@ import {
   ClientController,
   SaleController,
   EnrrollmentController,
+  PatientController,
 } from './controllers';
 import { AppService } from './services/app.service';
 import { LocalStrategy } from './strategies/local.strategy';
@@ -22,6 +23,7 @@ import { SessionSerializer } from './serializer/session.serializer';
     AppointmentController,
     SaleController,
     EnrrollmentController,
+    PatientController,
   ],
   providers: [
     ConfigService,

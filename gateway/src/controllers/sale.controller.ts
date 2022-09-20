@@ -17,21 +17,14 @@ import {
   GetProductsDto,
   IGetProductResponse,
 } from '../interfaces/sale';
-import { AppService } from '../services/app.service';
 
 @UseGuards(AuthGuard)
 @Controller('sales')
 export class SaleController {
   constructor(
-    private readonly appService: AppService,
     @Inject('SALE_SERVICE')
     private readonly saleServiceClient: ClientProxy,
   ) {}
-
-  @Get()
-  getHello(): string {
-    return this.appService.getHello('appointment');
-  }
 
   @Get('products')
   async getProducts(

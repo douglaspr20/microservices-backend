@@ -57,6 +57,13 @@ export class ConfigService {
       },
       transport: Transport.TCP,
     };
+    this.envConfig.patientService = {
+      options: {
+        port: process.env.PATIENT_SERVICE_PORT,
+        host: process.env.PATIENT_SERVICE_HOST,
+      },
+      transport: Transport.TCP,
+    };
   }
 
   get(key: string): any {

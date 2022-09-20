@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
-import { Body, Controller, HttpStatus } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { Controller, HttpStatus } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AxiosError } from 'axios';
 import { GetEnrrollmentsDto, GetEnrrollmentsResponseDto } from './interfaces';
 
@@ -10,7 +10,7 @@ export class EnrrollmentController {
 
   @MessagePattern('get_enrrollments')
   async getEnrrollmnets(
-    @Body() getEnrrollmentsDto: GetEnrrollmentsDto,
+    @Payload() getEnrrollmentsDto: GetEnrrollmentsDto,
   ): Promise<GetEnrrollmentsResponseDto> {
     const { mindbodyauthorization } = getEnrrollmentsDto;
 

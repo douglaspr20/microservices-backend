@@ -1,6 +1,6 @@
-import { Body, Controller, HttpStatus } from '@nestjs/common';
+import { Controller, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AxiosError } from 'axios';
 import {
   AddClientToClassDto,
@@ -18,7 +18,7 @@ export class ClassController {
 
   @MessagePattern('get_classes')
   async getClasses(
-    @Body() getClassesDto: GetClassesDto,
+    @Payload() getClassesDto: GetClassesDto,
   ): Promise<GetClassesResponseDto> {
     const { mindBodyAuthorization } = getClassesDto;
     if (!mindBodyAuthorization) {
@@ -81,7 +81,7 @@ export class ClassController {
 
   @MessagePattern('class_descriptions')
   async getClassDescriptions(
-    @Body() getClassDescriptionDto: GetClassDescriptionDto,
+    @Payload() getClassDescriptionDto: GetClassDescriptionDto,
   ): Promise<GetClassDescriptionResponseDto> {
     const { mindBodyAuthorization } = getClassDescriptionDto;
 
@@ -147,7 +147,7 @@ export class ClassController {
 
   @MessagePattern('add_client_to_class')
   async addClientToClass(
-    @Body() addClientToClassDto: AddClientToClassDto,
+    @Payload() addClientToClassDto: AddClientToClassDto,
   ): Promise<AddClientToClassResponseDto> {
     const { mindBodyAuthorization } = addClientToClassDto;
 

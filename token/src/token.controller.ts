@@ -1,6 +1,6 @@
-import { Body, Controller, HttpStatus } from '@nestjs/common';
+import { Controller, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AxiosError } from 'axios';
 import { TokenService } from './services/token.service';
 import {
@@ -23,7 +23,7 @@ export class TokenController {
 
   @MessagePattern('create_token')
   async createToken(
-    @Body() createTokenDto: CreateTokenDto,
+    @Payload() createTokenDto: CreateTokenDto,
   ): Promise<CreateTokenResponseDto> {
     try {
       const token: string = this.tokenService.createToken(createTokenDto);
@@ -112,7 +112,7 @@ export class TokenController {
 
   @MessagePattern('validate_token')
   async decodeToken(
-    @Body() decodeTokenDto: DecodeTokenDto,
+    @Payload() decodeTokenDto: DecodeTokenDto,
   ): Promise<DecodeTokenResponseDto> {
     const tokenData = this.tokenService.validateToken(decodeTokenDto.token);
 

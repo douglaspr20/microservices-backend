@@ -1,5 +1,5 @@
-import { Controller, Body, HttpStatus } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { Controller, HttpStatus } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { UserService } from './services/user.service';
 
 import {
@@ -17,7 +17,7 @@ export class UserController {
 
   @MessagePattern('user_register')
   async register(
-    @Body() createUserDto: CreateUserDto,
+    @Payload() createUserDto: CreateUserDto,
   ): Promise<IUserCreateResponse> {
     if (!createUserDto) {
       return {
@@ -66,7 +66,7 @@ export class UserController {
   }
 
   @MessagePattern('user_login')
-  async login(@Body() userInfo: LoginUserDto): Promise<IUserSearchResponse> {
+  async login(@Payload() userInfo: LoginUserDto): Promise<IUserSearchResponse> {
     if (!userInfo.Email || !userInfo.Password) {
       return {
         status: HttpStatus.UNAUTHORIZED,
@@ -94,7 +94,7 @@ export class UserController {
 
   @MessagePattern('search_user_by_id')
   async searchUserById(
-    @Body() getUserByIdDto: GetUserByIdDto,
+    @Payload() getUserByIdDto: GetUserByIdDto,
   ): Promise<IUserSearchResponse> {
     if (!getUserByIdDto) {
       return {
@@ -133,7 +133,7 @@ export class UserController {
 
   @MessagePattern('update_user')
   async updateUser(
-    @Body() updateUserDto: UpdateUserDto,
+    @Payload() updateUserDto: UpdateUserDto,
   ): Promise<IUserSearchResponse> {
     if (!updateUserDto) {
       return {

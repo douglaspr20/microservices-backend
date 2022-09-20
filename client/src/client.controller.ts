@@ -1,7 +1,7 @@
-import { Controller, Body, HttpStatus } from '@nestjs/common';
+import { Controller, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   CreateClientDto,
   CreateClientResponseDto,
@@ -19,7 +19,7 @@ export class ClientController {
 
   @MessagePattern('add_client')
   async addClient(
-    @Body() createClientDto: CreateClientDto,
+    @Payload() createClientDto: CreateClientDto,
   ): Promise<CreateClientResponseDto> {
     const { mindbodyauthorization } = createClientDto;
     if (!createClientDto) {
@@ -82,7 +82,7 @@ export class ClientController {
 
   @MessagePattern('get_clients')
   async getClients(
-    @Body() getclientsDto: GetClientsDto,
+    @Payload() getclientsDto: GetClientsDto,
   ): Promise<GetClientsResponseDto> {
     const {
       limit = 100,
@@ -145,7 +145,7 @@ export class ClientController {
 
   @MessagePattern('get_client_by_id')
   async getClientById(
-    @Body() getClientMemberDto: GetClientMemberDto,
+    @Payload() getClientMemberDto: GetClientMemberDto,
   ): Promise<GetClientMemberByIdResponseDto> {
     const { clientId } = getClientMemberDto;
 
@@ -191,7 +191,7 @@ export class ClientController {
 
   @MessagePattern('update_client')
   async updateClient(
-    @Body() updateClientDto: UpdateClientDto,
+    @Payload() updateClientDto: UpdateClientDto,
   ): Promise<CreateClientResponseDto> {
     const { mindBodyAuthorization, clientId } = updateClientDto;
 

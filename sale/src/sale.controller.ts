@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
-import { Body, Controller, HttpStatus } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { Controller, HttpStatus } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AxiosError } from 'axios';
 import { GetProductResponseDto, GetProductsDto } from './interfaces';
 import { MindBodyErrorResponse } from './types';
@@ -11,7 +11,7 @@ export class SaleController {
 
   @MessagePattern('get_products')
   async getProducts(
-    @Body() getProductsDto: GetProductsDto,
+    @Payload() getProductsDto: GetProductsDto,
   ): Promise<GetProductResponseDto> {
     const { mindBodyAuthorization } = getProductsDto;
 

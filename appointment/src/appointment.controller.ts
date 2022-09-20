@@ -1,5 +1,5 @@
-import { Body, Controller, HttpStatus } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { Controller, HttpStatus } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { AddAppointmentDto, AddAppointmentResponseDto } from './interfaces';
@@ -11,7 +11,7 @@ export class AppointmentController {
 
   @MessagePattern('add_appointment')
   async addClientToClass(
-    @Body() addAppointmentDto: AddAppointmentDto,
+    @Payload() addAppointmentDto: AddAppointmentDto,
   ): Promise<AddAppointmentResponseDto> {
     const { mindBodyAuthorization } = addAppointmentDto;
 

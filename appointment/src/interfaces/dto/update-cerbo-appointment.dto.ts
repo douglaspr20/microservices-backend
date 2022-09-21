@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { validStatus } from './get-cerbo-appointments.dto';
+import { validStatus } from '../../types';
 
 export class UpdateCerboAppointmentDto {
   @IsNumberString()
@@ -28,9 +28,9 @@ export class UpdateCerboAppointmentDto {
   @IsOptional()
   pt_id: number;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  appointment_type: number;
+  appointment_type: string;
 
   @IsString()
   @IsOptional()

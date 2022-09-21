@@ -104,9 +104,38 @@ export class AppointmentController {
     };
   }
 
+  @Get('wellness/types')
+  async getAppointmentWellnessTypes(
+    @Query() queryParams: GetCerboAppointmentsTypesDto,
+  ): Promise<GetCerboAppointmentsTypesResponseDto> {
+    const getCerboAppointmentTypeResponse: IGetCerboAppointmentsTypesResponse =
+      await firstValueFrom(
+        this.appoitmentServiceClient.send('get_cerbo_appointments_types', {
+          ...queryParams,
+        }),
+      );
+
+    if (getCerboAppointmentTypeResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getCerboAppointmentTypeResponse.message,
+          data: null,
+          errors: getCerboAppointmentTypeResponse.errors,
+        },
+        getCerboAppointmentTypeResponse.status,
+      );
+    }
+
+    return {
+      message: getCerboAppointmentTypeResponse.message,
+      data: getCerboAppointmentTypeResponse.data,
+      errors: null,
+    };
+  }
+
   @Get('wellness/:appointment_id')
   async getSingleAppointmentWellness(
-    @Param() appointment_id: number,
+    @Param('appointment_id') appointment_id: number,
   ): Promise<GetSingleCerboAppointmentResponseDto> {
     const getSingleCerboAppointmentResponse: ISingleCerboAppointmentResponse =
       await firstValueFrom(
@@ -162,7 +191,7 @@ export class AppointmentController {
 
   @Put('wellness/:appointment_id')
   async updateAppointmentWellness(
-    @Param() appointment_id: number,
+    @Param('appointment_id') appointment_id: number,
     @Body() updateCerboAppointmentDto: UpdateCerboAppointmentDto,
   ): Promise<UpdateCerboAppointmentResponseDto> {
     const updateAppoimentCerboResponse: IUpdateCerboAppointmentResponse =
@@ -193,7 +222,7 @@ export class AppointmentController {
 
   @Delete('wellness/:appointment_id')
   async deleteAppointmentWellness(
-    @Param() appointment_id: number,
+    @Param('appointment_id') appointment_id: number,
   ): Promise<DeleteCerboAppointmentResponseDto> {
     const deleteAppoimentCerboResponse: IDeleteCerboAppointmentResponse =
       await firstValueFrom(
@@ -214,35 +243,6 @@ export class AppointmentController {
 
     return {
       message: deleteAppoimentCerboResponse.message,
-      errors: null,
-    };
-  }
-
-  @Get('wellness/types')
-  async getAppointmentWellnessTypes(
-    @Query() queryParams: GetCerboAppointmentsTypesDto,
-  ): Promise<GetCerboAppointmentsTypesResponseDto> {
-    const getCerboAppointmentTypeResponse: IGetCerboAppointmentsTypesResponse =
-      await firstValueFrom(
-        this.appoitmentServiceClient.send('get_cerbo_appointments_types', {
-          ...queryParams,
-        }),
-      );
-
-    if (getCerboAppointmentTypeResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: getCerboAppointmentTypeResponse.message,
-          data: null,
-          errors: getCerboAppointmentTypeResponse.errors,
-        },
-        getCerboAppointmentTypeResponse.status,
-      );
-    }
-
-    return {
-      message: getCerboAppointmentTypeResponse.message,
-      data: getCerboAppointmentTypeResponse.data,
       errors: null,
     };
   }

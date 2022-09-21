@@ -40,10 +40,6 @@ export enum EmailReminderSubject {
   The48HrNotice = '48Hr Notice',
 }
 
-export enum Object {
-  AppointmentType = 'appointment_type',
-}
-
 export enum SMSReminder {
   Empty = '',
   ReminderSMSTEST = 'Reminder SMS TEST',

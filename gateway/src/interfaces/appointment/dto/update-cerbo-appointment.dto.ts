@@ -2,16 +2,12 @@ import {
   IsDateString,
   IsEnum,
   IsNumber,
-  IsNumberString,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { validStatus } from '../appointmentCerbo.interface';
 
 export class UpdateCerboAppointmentDto {
-  @IsNumberString()
-  appointment_id: number;
-
   @IsDateString()
   @IsOptional()
   start_date_time: string;
@@ -28,9 +24,9 @@ export class UpdateCerboAppointmentDto {
   @IsOptional()
   pt_id: number;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  appointment_type: number;
+  appointment_type: string;
 
   @IsString()
   @IsOptional()

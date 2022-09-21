@@ -21,8 +21,8 @@ export class AddCerboAppointmentDto {
   @IsNumber()
   pt_id: number;
 
-  @IsNumber()
-  appointment_type: number;
+  @IsString()
+  appointment_type: string;
 
   @IsString()
   title: string;

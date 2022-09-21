@@ -9,3 +9,6 @@ export * from './get-single-cerbo-appointment-response.dto';
 export * from './add-cerbo-appointment.dto';
 export * from './add-cerbo-appointment-response.dto';
 export * from './update-cerbo-appointment.dto';
+export * from './update-cerbo-appointment-response.dto';
+export * from './delete-cerbo-appointment.dto';
+export * from './delete-cerbo-appointment-response.dto';

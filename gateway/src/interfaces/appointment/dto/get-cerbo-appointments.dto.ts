@@ -6,7 +6,7 @@ import {
   IsString,
   IsEnum,
 } from 'class-validator';
-import { validStatus } from '../../types';
+import { validStatus } from '../appointmentCerbo.interface';
 
 export class GetCerboAppointmentsDto {
   @IsNumberString()

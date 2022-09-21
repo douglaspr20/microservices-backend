@@ -7,6 +7,8 @@ import {
   AddAppointmentDto,
   AddAppointmentResponseDto,
   AddCerboAppointmentDto,
+  DeleteCerboAppointmentDto,
+  DeleteCerboAppointmentResponseDto,
   GetCerboAppointmentsDto,
   GetCerboAppointmentsResponseDto,
   GetCerboAppointmentsTypesDto,
@@ -14,8 +16,10 @@ import {
   GetSingleCerboAppointmentDto,
   GetSingleCerboAppointmentResponseDto,
   IAppointmentCerbo,
+  IDeleteAppointmentCerboResponse,
   IGetAppointmentResponseCerbo,
   IGetAppointmentTypeResponseCerbo,
+  UpdateCerboAppointmentResponseDto,
   UpdateCerboAppointmentDto,
 } from './interfaces';
 import { CerboErrorResponse, MindBodyErrorResponse } from './types';
@@ -248,9 +252,9 @@ export class AppointmentController {
   }
 
   @MessagePattern('update_cerbo_appointment')
-  async updateCerboAppointments(
+  async updateCerboAppointment(
     @Payload() updateCerboAppointmentDto: UpdateCerboAppointmentDto,
-  ): Promise<any> {
+  ): Promise<UpdateCerboAppointmentResponseDto> {
     const { appointment_id, ...rest } = updateCerboAppointmentDto;
     this.httpService.axiosRef.defaults.auth = {
       username: this.cerboUsername,
@@ -291,6 +295,49 @@ export class AppointmentController {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
         data: null,
+        errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('delete_cerbo_appointment')
+  async deleteCerboAppointment(
+    @Payload() deleteCerboAppointmentDto: DeleteCerboAppointmentDto,
+  ): Promise<DeleteCerboAppointmentResponseDto> {
+    const { appointment_id } = deleteCerboAppointmentDto;
+    this.httpService.axiosRef.defaults.auth = {
+      username: this.cerboUsername,
+      password: this.cerboSecretKey,
+    };
+
+    try {
+      await this.httpService.axiosRef.delete<IDeleteAppointmentCerboResponse>(
+        `${this.cerboUrl}/appointments/${appointment_id}`,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Appointment Successfully Deleted',
+        errors: null,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      console.log(response);
+
+      const { error, message } = response.data as CerboErrorResponse;
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          message: error ? error.message : message,
+          errors: e.errors,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
         errors: e.errors,
       };
     }

@@ -1,4 +1,4 @@
-import { IAppointmentType } from './appointmentTypeCerbo,interface';
+import { IAppointmentType } from './appointmentTypeCerbo.interface';
 
 export interface IGetAppointmentTypeResponseCerbo {
   object: string;

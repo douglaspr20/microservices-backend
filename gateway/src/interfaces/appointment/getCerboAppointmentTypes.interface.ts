@@ -1,6 +1,6 @@
-import { IAppointmentType } from '../appointmentTypeCerbo.interface';
+import { IAppointmentType } from './appointmentTypeCerbo.interface';
 
-export class GetCerboAppointmentsTypesResponseDto {
+export class IGetCerboAppointmentsTypesResponse {
   status: number;
   message: string;
   data: {

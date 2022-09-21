@@ -1,2 +1,3 @@
 export * from './mindBodyReponseError.type';
-export * from './CerboErrorReponse.type';
+export * from './cerboErrorReponse.type';
+export * from './appointmentCerboValidStatus.type';

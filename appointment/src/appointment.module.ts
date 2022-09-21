@@ -6,20 +6,7 @@ import { AppointmentService } from './services/appointment.service';
 import { ConfigService } from './services/config.service';
 
 @Module({
-  imports: [
-    ConfigModule,
-    HttpModule.registerAsync({
-      useFactory: async (configService: ConfigService) => ({
-        baseURL: `${configService.get('mindbodyBaseUrl')}/appointment`,
-        headers: {
-          'API-Key': configService.get('mindbodyApiKey'),
-          SiteId: configService.get('mindbodySiteId'),
-        },
-      }),
-      inject: [ConfigService],
-      extraProviders: [ConfigService],
-    }),
-  ],
+  imports: [ConfigModule, HttpModule],
   controllers: [AppointmentController],
   providers: [AppointmentService, ConfigService],
 })

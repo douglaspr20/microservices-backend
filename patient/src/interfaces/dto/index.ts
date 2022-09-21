@@ -1,5 +1,5 @@
 export * from './get-patients.dto';
-export * from './get-patient-reponse.dto';
+export * from './get-patients-reponse.dto';
 export * from './get-single-patient.dto';
 export * from './get-single-patient-reponse.dto';
 export * from './add-patient.dto';

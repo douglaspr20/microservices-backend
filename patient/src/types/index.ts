@@ -1,1 +1,1 @@
-export * from './CerboErrorReponsetype';
+export * from './CerboErrorReponse.type';

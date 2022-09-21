@@ -1,4 +1,4 @@
-export interface IAppointment {
+export interface IAppointmentMindBody {
   GenderPreference: string;
   Duration: number;
   ProviderId: string;

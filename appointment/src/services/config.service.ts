@@ -8,6 +8,9 @@ export class ConfigService {
       mindbodyBaseUrl: process.env.MINDBODY_BASE_URL,
       mindbodyApiKey: process.env.MINDBODY_API_KEY,
       mindbodySiteId: process.env.MINDBODY_SITE_ID,
+      cerboBaseUrl: process.env.CERBO_BASEURL,
+      cerboUsername: process.env.CERBO_USERNAME,
+      cerboSecretKey: process.env.CERBO_SECRET_KEY,
     };
   }
 

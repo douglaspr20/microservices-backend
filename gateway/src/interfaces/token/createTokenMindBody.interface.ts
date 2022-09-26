@@ -1,6 +1,6 @@
 export class ICreateMindBodyToken {
   status: number;
   message: string;
-  minbodyToken?: string;
+  mindBodyToken?: string;
   errors: { [key: string]: any };
 }

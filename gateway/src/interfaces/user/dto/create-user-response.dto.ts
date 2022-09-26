@@ -5,7 +5,6 @@ export class CreateUserResponseDto {
 
   data: {
     user: IUser;
-    mindBodyAuthorization?: string;
     authorization?: string;
   };
   errors: { [key: string]: any };

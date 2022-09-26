@@ -4,34 +4,47 @@ import {
   MinLength,
   MaxLength,
   Matches,
-  IsNumber,
-  IsDate,
+  IsObject,
+  IsNotEmptyObject,
+  IsDateString,
+  IsOptional,
+  IsNumberString,
 } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
   @MinLength(2)
-  FirstName: string;
+  firstName: string;
 
   @IsString()
   @MinLength(2)
-  LastName: string;
+  lastName: string;
 
   @IsString()
   @IsEmail()
-  Email: string;
+  email: string;
 
   @IsString()
-  @IsEmail()
-  State: string;
+  gender: string;
 
-  @IsNumber()
-  @MinLength(8)
-  WorkPhone: number;
+  @IsDateString()
+  birthdate: string;
 
-  @IsDate()
-  @IsEmail()
-  Birthdate: string;
+  @IsString()
+  @MinLength(6, {
+    message: 'the mobile phone must have a minimum length of 6 digits.',
+  })
+  mobilePhone: string;
+
+  @IsObject()
+  @IsNotEmptyObject()
+  address: {
+    streetAddress: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
 
   @IsString()
   @MinLength(8)
@@ -40,11 +53,18 @@ export class CreateUserDto {
     message:
       'Minimum eight characters, at least one letter, one number and one special character:',
   })
-  Password: string;
+  password: string;
 
   @IsString()
-  MindBodyToken: string;
+  mindBodyToken?: string;
 
-  @IsNumber()
-  MindBodyClientId: number;
+  @IsNumberString()
+  mindBodyClientId?: string;
+
+  @IsString()
+  cerboPatientId?: string;
+
+  @IsNumberString()
+  @IsOptional()
+  verificationCode?: string;
 }

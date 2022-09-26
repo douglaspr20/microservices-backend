@@ -12,10 +12,15 @@ import {
   PatientController,
 } from './controllers';
 import { AppService } from './services/app.service';
-import { LocalStrategy } from './strategies/local.strategy';
-import { SessionSerializer } from './serializer/session.serializer';
+import { LocalStrategy, JwtStrategy } from './strategies';
+// import { SessionSerializer } from './serializer/session.serializer';
 @Module({
-  imports: [PassportModule.register({ session: true })],
+  imports: [
+    PassportModule.register({
+      defaultStrategy: 'jwt',
+      // session: true
+    }),
+  ],
   controllers: [
     UserController,
     ClientController,
@@ -98,7 +103,8 @@ import { SessionSerializer } from './serializer/session.serializer';
     },
     AppService,
     LocalStrategy,
-    SessionSerializer,
+    JwtStrategy,
+    // SessionSerializer,
   ],
 })
 export class AppModule {}

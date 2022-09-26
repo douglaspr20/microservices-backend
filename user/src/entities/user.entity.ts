@@ -12,37 +12,55 @@ export class User {
   id: number;
 
   @Column('text')
-  FirstName: string;
+  firstName: string;
 
   @Column('text')
-  LastName: string;
+  lastName: string;
 
   @Column('text')
-  Email: string;
+  email: string;
 
   @Column('text')
-  Password: string;
-
-  @Column('text')
-  State: string;
-
-  @Column('bigint')
-  WorkPhone: number;
+  gender: string;
 
   @Column('date')
-  Birthdate: string;
+  birthdate: string;
+
+  @Column('text')
+  mobilePhone: string;
+
+  @Column('jsonb', {
+    nullable: false,
+    default: {
+      streetAddress: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: '',
+    },
+  })
+  address: {
+    streetAddress: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
 
   @Column('text', {
     nullable: true,
   })
-  MindBodyToken: string;
+  mindBodyToken: string;
 
-  @Column('int')
-  MindBodyClientId: number;
+  @Column('text')
+  mindbodyClientId: string;
+
+  @Column('text')
+  cerboPatientId: string;
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
-    this.Email = this.Email.toLowerCase().trim();
+    this.email = this.email.toLowerCase().trim();
   }
 
   @BeforeUpdate()

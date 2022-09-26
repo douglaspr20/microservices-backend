@@ -8,3 +8,4 @@ export * from './update-patient.dto';
 export * from './update-patient-response.dto';
 export * from './delete-patient.dto';
 export * from './delete-patient-response.dto';
+export * from './search-patient.dto';

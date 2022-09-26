@@ -1,11 +1,18 @@
 export interface IUser {
   id: number;
-  Email: string;
-  FirstName: string;
-  LastName: string;
-  State: string;
-  WorkPhone: number;
-  Birthdate: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  gender: string;
+  birthdate: string;
+  mobilePhone: string;
+  address: {
+    streetAddress: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
   MindBodyToken?: string;
-  MindBodyClientId: number;
+  MindBodyClientId?: number;
 }

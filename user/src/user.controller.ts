@@ -267,8 +267,7 @@ export class UserController {
     }
 
     try {
-      const confirmForgotPassword =
-        await this.userService.confirmForgotPassword(confirmForgotPasswordDto);
+      await this.userService.confirmForgotPassword(confirmForgotPasswordDto);
 
       return {
         status: HttpStatus.OK,

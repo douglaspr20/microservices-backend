@@ -111,22 +111,20 @@ export class TokenController {
   }
 
   @MessagePattern('validate_token')
-  async decodeToken(
-    @Payload() decodeTokenDto: DecodeTokenDto,
-  ): Promise<DecodeTokenResponseDto> {
+  async decodeToken(@Payload() decodeTokenDto: DecodeTokenDto): Promise<any> {
     const tokenData = this.tokenService.validateToken(decodeTokenDto.token);
 
-    if (!tokenData) {
-      return {
-        status: HttpStatus.UNAUTHORIZED,
-        message: 'Unauthorized',
-        userId: null,
-      };
-    }
+    // if (!tokenData) {
+    //   return {
+    //     status: HttpStatus.UNAUTHORIZED,
+    //     message: 'Unauthorized',
+    //     userId: null,
+    //   };
+    // }
     return {
       status: HttpStatus.OK,
       message: 'Token validate',
-      userId: tokenData,
+      tokenData,
     };
   }
 }

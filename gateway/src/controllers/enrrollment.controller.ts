@@ -8,9 +8,9 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { AuthGuard } from '@nestjs/passport';
 import { firstValueFrom } from 'rxjs';
 import { GetRequestHeaderParam } from '../decorators/getRequestHeaderParam.decorator';
-import { AuthGuard } from '../guards/auth.guard';
 import {
   GetEnrrollmentsDto,
   GetEnrrollmentsResponseDto,
@@ -18,7 +18,7 @@ import {
 } from '../interfaces/enrrollment';
 import { AppService } from '../services/app.service';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard('jwt'))
 @Controller('enrrollments')
 export class EnrrollmentController {
   constructor(

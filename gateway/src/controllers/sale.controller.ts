@@ -8,17 +8,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { AuthGuard } from '@nestjs/passport';
 import { firstValueFrom } from 'rxjs';
 import { GetUserRequest } from '../decorators';
 import { IUser } from '../interfaces/user';
-import { AuthGuard } from '../guards/auth.guard';
+
 import {
   GetProductResponseDto,
   GetProductsDto,
   IGetProductResponse,
 } from '../interfaces/sale';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard('jwt'))
 @Controller('sales')
 export class SaleController {
   constructor(

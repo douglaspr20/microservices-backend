@@ -10,6 +10,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { AuthGuard } from '@nestjs/passport';
 import { firstValueFrom } from 'rxjs';
 import {
   CreateUserDto,
@@ -24,7 +25,6 @@ import {
 } from '../interfaces/user';
 import { ICreateMindBodyToken } from '../interfaces/token';
 
-import { AuthGuard, LocalAuthGuard } from '../guards';
 import { GetRequestHeaderParam, GetUserRequest } from '../decorators';
 import {
   IClientAddedResponse,
@@ -45,7 +45,7 @@ export class UserController {
     private readonly patientServiceClient: ClientProxy,
   ) {}
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   async getUser(@GetUserRequest() user: IUser) {
     return {
@@ -58,7 +58,7 @@ export class UserController {
     };
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Put()
   async updateUser(
     @Body() updateUserDto: UpdateUserDto,
@@ -246,7 +246,7 @@ export class UserController {
     };
   }
 
-  @UseGuards(LocalAuthGuard)
+  // @UseGuards(LocalAuthGuard)
   @Post('auth')
   async login(@Body() loginUserDto: LoginUserDto): Promise<any> {
     // const createMindBodyTokenResponse: ICreateMindBodyToken =
@@ -306,19 +306,14 @@ export class UserController {
     };
   }
 
-  // @UseGuards(AuthGuard)
   @Put('auth/changePassword')
-  async changePassword(
-    @GetRequestHeaderParam('authorization') authorization: string,
-    @Body() changePasswordDto: ChangePasswordDto,
-  ) {
+  @UseGuards(AuthGuard('jwt'))
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
     const changePasswordResponse: any = await firstValueFrom(
       this.userServiceClient.send('user_change_password', {
-        authorization,
         ...changePasswordDto,
       }),
     );
-
     if (changePasswordResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
@@ -329,7 +324,6 @@ export class UserController {
         changePasswordResponse.status,
       );
     }
-
     return {
       message: 'Password Changed Successfully',
       data: {
@@ -394,12 +388,10 @@ export class UserController {
   }
 
   @Post('auth/logout')
-  // @UseGuards(AuthGuard)
-  async logoutUser(
-    @GetRequestHeaderParam('authorization') authorization: string,
-  ) {
+  @UseGuards(AuthGuard('jwt'))
+  async logoutUser(@GetRequestHeaderParam('accesstoken') accesstoken: string) {
     const logoutResponse: any = await firstValueFrom(
-      this.userServiceClient.send('logout', authorization),
+      this.userServiceClient.send('logout', accesstoken),
     );
 
     if (logoutResponse.status !== HttpStatus.OK) {

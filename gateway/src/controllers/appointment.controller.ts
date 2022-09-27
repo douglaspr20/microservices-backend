@@ -16,7 +16,6 @@ import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { GetUserRequest } from '../decorators';
 import { IUser } from '../interfaces/user';
-import { AuthGuard } from '../guards/auth.guard';
 import {
   AddAppointmentCerboResponseDto,
   AddAppointmentDto,
@@ -37,8 +36,9 @@ import {
   GetCerboAppointmentsTypesResponseDto,
   IGetCerboAppointmentsTypesResponse,
 } from '../interfaces/appointment';
+import { AuthGuard } from '@nestjs/passport';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard('jwt'))
 @Controller('appointments')
 export class AppointmentController {
   constructor(

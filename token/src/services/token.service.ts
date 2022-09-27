@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { CreateTokenDto } from 'src/interfaces';
+import { CreateTokenDto } from '../interfaces';
 
 @Injectable()
 export class TokenService {
@@ -13,17 +13,14 @@ export class TokenService {
   }
 
   validateToken(token: string) {
-    const tokenData = this.jwtService.decode(token) as {
+    const tokenData = this.jwtService.verify(token) as {
       exp: number;
       userId: number;
     };
-
     const validateDate = Math.floor(new Date().getTime() / 1000);
-
     if (!tokenData || tokenData.exp <= validateDate) {
       return null;
     }
-
     return tokenData.userId;
   }
 }

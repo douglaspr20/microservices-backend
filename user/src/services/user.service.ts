@@ -194,7 +194,7 @@ export class UserService {
 
     return await cognito
       .globalSignOut({
-        AccessToken: accessToken,
+        AccessToken: accessToken.replace('Bearer ', ''),
       })
       .promise();
   }

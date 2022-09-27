@@ -10,6 +10,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const { clientId, userPoolId, region } = configService.get('cognito');
 
     const authority = `https://cognito-idp.${region}.amazonaws.com/${userPoolId}`;
+
     super({
       secretOrKeyProvider: passportJwtSecret({
         cache: true,
@@ -26,6 +27,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   public async validate(payload: any) {
+    if (!payload.email_verified) return false;
+
     return !!payload.sub;
   }
 }

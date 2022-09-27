@@ -5,3 +5,5 @@ export * from './login-user.dto';
 export * from './change-password.dto';
 export * from './forgot-password.dto';
 export * from './confirm-forgot-password.dto';
+export * from './forgot-password-response.dto';
+export * from './logout-response.dto';

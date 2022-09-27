@@ -1,7 +1,4 @@
-import { IUser } from '../user.interface';
-
 export class CreateUserResponseDto {
+  status: number;
   message: string;
-  data: IUser;
-  errors: { [key: string]: any };
 }

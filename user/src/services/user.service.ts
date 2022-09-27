@@ -102,20 +102,23 @@ export class UserService {
       .update(email + clientId)
       .digest('base64');
 
-    const initAuthResponse = await cognito
-      .adminInitiateAuth({
-        UserPoolId: userPoolId,
-        ClientId: clientId,
-        AuthFlow: 'ADMIN_NO_SRP_AUTH',
-        AuthParameters: {
-          USERNAME: email,
-          PASSWORD: password,
-          SECRET_HASH: hash,
-        },
-      })
-      .promise();
+    const [initAuthResponse, userDb] = await Promise.all([
+      cognito
+        .adminInitiateAuth({
+          UserPoolId: userPoolId,
+          ClientId: clientId,
+          AuthFlow: 'ADMIN_NO_SRP_AUTH',
+          AuthParameters: {
+            USERNAME: email,
+            PASSWORD: password,
+            SECRET_HASH: hash,
+          },
+        })
+        .promise(),
+      this.searchUserByEmail(email),
+    ]);
 
-    return initAuthResponse;
+    return { ...initAuthResponse.AuthenticationResult, userDb };
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto) {
@@ -178,7 +181,7 @@ export class UserService {
 
     const cognito = new this.aws.CognitoIdentityServiceProvider();
 
-    return await cognito
+    const initAuthResponse = await cognito
       .initiateAuth({
         ClientId: clientId,
         AuthFlow: 'REFRESH_TOKEN ',
@@ -187,6 +190,8 @@ export class UserService {
         },
       })
       .promise();
+
+    return initAuthResponse.AuthenticationResult;
   }
 
   async logOut(accessToken: string) {

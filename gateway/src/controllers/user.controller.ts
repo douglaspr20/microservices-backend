@@ -22,6 +22,10 @@ import {
   LoginUserDto,
   ForgotPasswordDto,
   ConfirmForgotPasswordDto,
+  IForgotPasswordResponse,
+  ForgotPasswordResponseDto,
+  LogoutResponseDto,
+  ILogoutResponse,
 } from '../interfaces/user';
 import { ICreateMindBodyToken } from '../interfaces/token';
 
@@ -105,8 +109,6 @@ export class UserController {
       throw new HttpException(
         {
           message: registerUserReponse.message,
-          data: null,
-          errors: registerUserReponse.errors,
         },
         registerUserReponse.status,
       );
@@ -114,15 +116,13 @@ export class UserController {
 
     return {
       message: registerUserReponse.message,
-      data: {
-        user: registerUserReponse.user,
-      },
-      errors: null,
     };
   }
 
   @Post('register/confirm')
-  async confirmRegister(@Body() createUserDto: CreateUserDto): Promise<any> {
+  async confirmRegister(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<CreateUserResponseDto> {
     const createMindBodyTokenResponse: ICreateMindBodyToken =
       await firstValueFrom(
         this.tokenServiceClient.send('create_mind_body_token', {}),
@@ -132,8 +132,6 @@ export class UserController {
       throw new HttpException(
         {
           message: createMindBodyTokenResponse.message,
-          data: null,
-          errors: createMindBodyTokenResponse.errors,
         },
         createMindBodyTokenResponse.status,
       );
@@ -230,41 +228,34 @@ export class UserController {
       throw new HttpException(
         {
           message: userRegisterResponse.message,
-          data: null,
-          errors: userRegisterResponse.errors,
         },
         userRegisterResponse.status,
       );
     }
 
     return {
-      message: 'register successfully',
-      data: {
-        ...userRegisterResponse.user,
-      },
-      errors: null,
+      message: userRegisterResponse.message,
     };
   }
 
-  // @UseGuards(LocalAuthGuard)
   @Post('auth')
   async login(@Body() loginUserDto: LoginUserDto): Promise<any> {
-    // const createMindBodyTokenResponse: ICreateMindBodyToken =
-    //   await firstValueFrom(
-    //     this.tokenServiceClient.send('create_mind_body_token', {}),
-    //   );
-    // const { mindBodyToken } = createMindBodyTokenResponse;
+    const createMindBodyTokenResponse: ICreateMindBodyToken =
+      await firstValueFrom(
+        this.tokenServiceClient.send('create_mind_body_token', {}),
+      );
+    const { mindBodyToken } = createMindBodyTokenResponse;
 
-    // if (createMindBodyTokenResponse.status !== HttpStatus.CREATED) {
-    //   throw new HttpException(
-    //     {
-    //       message: createMindBodyTokenResponse.message,
-    //       data: null,
-    //       errors: createMindBodyTokenResponse.errors,
-    //     },
-    //     createMindBodyTokenResponse.status,
-    //   );
-    // }
+    if (createMindBodyTokenResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: createMindBodyTokenResponse.message,
+          data: null,
+          errors: createMindBodyTokenResponse.errors,
+        },
+        createMindBodyTokenResponse.status,
+      );
+    }
 
     const userLoginResponse: any = await firstValueFrom(
       this.userServiceClient.send('user_login', {
@@ -283,25 +274,24 @@ export class UserController {
       );
     }
 
-    const { userLoginInfo } = userLoginResponse;
+    const { idToken, accessToken, expiresIn, refreshToken, userDb } =
+      userLoginResponse;
 
-    // Promise.resolve(
-    //   firstValueFrom(
-    //     this.userServiceClient.send('update_user', {
-    //       id: user.id,
-    //       mindBodyToken: mindBodyToken,
-    //     }),
-    //   ),
-    // );
+    Promise.resolve(
+      firstValueFrom(
+        this.userServiceClient.send('update_user', {
+          id: userDb.id,
+          mindBodyToken: mindBodyToken,
+        }),
+      ),
+    );
 
     return {
       message: 'Login successfully',
-      data: {
-        idToken: userLoginInfo.AuthenticationResult.IdToken,
-        accessToken: userLoginInfo.AuthenticationResult.AccessToken,
-        expires: userLoginInfo.AuthenticationResult.ExpiresIn,
-        refreshToken: userLoginInfo.AuthenticationResult.RefreshToken,
-      },
+      idToken,
+      accessToken,
+      expiresIn,
+      refreshToken,
       errors: null,
     };
   }
@@ -334,20 +324,21 @@ export class UserController {
   }
 
   @Post('auth/forgotPassword')
-  async forgotPasswordSendCode(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    const forgotPasswordResponse: any = await firstValueFrom(
-      this.userServiceClient.send(
-        'user_forgot_password',
-        forgotPasswordDto.email,
-      ),
-    );
+  async forgotPasswordSendCode(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<ForgotPasswordResponseDto> {
+    const forgotPasswordResponse: IForgotPasswordResponse =
+      await firstValueFrom(
+        this.userServiceClient.send(
+          'user_forgot_password',
+          forgotPasswordDto.email,
+        ),
+      );
 
     if (forgotPasswordResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
           message: forgotPasswordResponse.message,
-          data: null,
-          errors: forgotPasswordResponse.errors,
         },
         forgotPasswordResponse.status,
       );
@@ -355,27 +346,25 @@ export class UserController {
 
     return {
       message: forgotPasswordResponse.message,
-      errors: null,
     };
   }
 
   @Put('auth/forgotPassword')
   async forgotPasswordRecovery(
     @Body() confirmForgotPasswordDto: ConfirmForgotPasswordDto,
-  ) {
-    const confirmForgotPasswordResponse: any = await firstValueFrom(
-      this.userServiceClient.send(
-        'user_confirm_forgot_password',
-        confirmForgotPasswordDto,
-      ),
-    );
+  ): Promise<ForgotPasswordResponseDto> {
+    const confirmForgotPasswordResponse: IForgotPasswordResponse =
+      await firstValueFrom(
+        this.userServiceClient.send(
+          'user_confirm_forgot_password',
+          confirmForgotPasswordDto,
+        ),
+      );
 
     if (confirmForgotPasswordResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
           message: confirmForgotPasswordResponse.message,
-          data: null,
-          errors: confirmForgotPasswordResponse.errors,
         },
         confirmForgotPasswordResponse.status,
       );
@@ -383,14 +372,15 @@ export class UserController {
 
     return {
       message: confirmForgotPasswordResponse.message,
-      errors: null,
     };
   }
 
   @Post('auth/logout')
   @UseGuards(AuthGuard('jwt'))
-  async logoutUser(@GetRequestHeaderParam('accesstoken') accesstoken: string) {
-    const logoutResponse: any = await firstValueFrom(
+  async logoutUser(
+    @GetRequestHeaderParam('accesstoken') accesstoken: string,
+  ): Promise<LogoutResponseDto> {
+    const logoutResponse: ILogoutResponse = await firstValueFrom(
       this.userServiceClient.send('logout', accesstoken),
     );
 
@@ -398,8 +388,6 @@ export class UserController {
       throw new HttpException(
         {
           message: logoutResponse.message,
-          data: null,
-          errors: logoutResponse.errors,
         },
         logoutResponse.status,
       );
@@ -407,7 +395,6 @@ export class UserController {
 
     return {
       message: logoutResponse.message,
-      errors: null,
     };
   }
 }

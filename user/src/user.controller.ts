@@ -5,12 +5,17 @@ import { UserService } from './services/user.service';
 import {
   CreateUserDto,
   IUserSearchResponse,
-  IUserCreateResponse,
   LoginUserDto,
   GetUserByIdDto,
   UpdateUserDto,
   ChangePasswordDto,
   ConfirmForgotPasswordDto,
+  CreateUserResponseDto,
+  ConfirmCreateUserResponseDto,
+  LoginResponseDto,
+  ChangePasswordResponseDto,
+  ForgotPasswordResponseDto,
+  LogoutResponseDto,
 } from './interfaces';
 
 @Controller('user')
@@ -18,13 +23,13 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @MessagePattern('user_register')
-  async register(@Payload() createUserDto: CreateUserDto): Promise<any> {
+  async register(
+    @Payload() createUserDto: CreateUserDto,
+  ): Promise<CreateUserResponseDto> {
     if (!createUserDto) {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'Missing data for register user',
-        user: null,
-        errors: null,
+        message: 'Bad or missing parameter',
       };
     }
 
@@ -35,62 +40,49 @@ export class UserController {
     if (userAlreadyExist) {
       return {
         status: HttpStatus.CONFLICT,
-        message: 'Conflict',
-        user: null,
-        errors: {
-          email: {
-            message: 'User already exists',
-          },
-        },
+        message: 'User already has an account registered',
       };
     }
 
     try {
-      const createdUser = await this.userService.register(createUserDto);
+      await this.userService.register(createUserDto);
       return {
         status: HttpStatus.CREATED,
-        message: 'User created successfully',
-        user: createdUser,
-        errors: null,
+        message:
+          'Your account was successfully created. Please check your email to verify your new account before logging in',
       };
     } catch (e) {
       if (e.statusCode && e.statusCode !== HttpStatus.INTERNAL_SERVER_ERROR) {
         return {
           status: e.statusCode,
           message: e.message,
-          user: null,
-          errors: e.errors,
         };
       }
       console.log(e.message);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
-        user: null,
-        errors: e.errors,
       };
     }
   }
 
   @MessagePattern('user_confirm_register')
-  async confirmRegister(@Payload() createUserDto: CreateUserDto): Promise<any> {
+  async confirmRegister(
+    @Payload() createUserDto: CreateUserDto,
+  ): Promise<ConfirmCreateUserResponseDto> {
     if (!createUserDto) {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'Missing data for register user',
-        user: null,
-        errors: null,
+        message: 'Missing data for for confirm register',
       };
     }
 
     try {
-      const createdUser = await this.userService.confirmRegister(createUserDto);
+      await this.userService.confirmRegister(createUserDto);
 
       return {
         status: HttpStatus.CREATED,
-        message: 'User register successfully',
-        user: createdUser,
-        errors: null,
+        message: 'Account successfully verified',
       };
     } catch (e) {
       console.log(e);
@@ -99,44 +91,36 @@ export class UserController {
         return {
           status: e.statusCode,
           message: e.message,
-          user: null,
-          errors: e.errors,
         };
       }
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
-        user: null,
-        errors: e.errors,
       };
     }
   }
 
   @MessagePattern('user_login')
-  async login(@Payload() userInfo: LoginUserDto): Promise<any> {
+  async login(@Payload() userInfo: LoginUserDto): Promise<LoginResponseDto> {
     if (!userInfo.email || !userInfo.password) {
       return {
         status: HttpStatus.UNAUTHORIZED,
-        message: 'User not found',
-        user: null,
+        message: 'Bad or missing parameter',
       };
     }
 
     try {
-      const userLoginInfo = await this.userService.login(userInfo);
-
-      if (!userLoginInfo) {
-        return {
-          status: HttpStatus.UNAUTHORIZED,
-          message: 'User not found',
-          userLoginInfo: null,
-        };
-      }
+      const { RefreshToken, AccessToken, IdToken, ExpiresIn, userDb } =
+        await this.userService.login(userInfo);
 
       return {
         status: HttpStatus.OK,
-        message: 'User login successfully',
-        userLoginInfo,
+        message: 'Login successfully',
+        idToken: IdToken,
+        accessToken: AccessToken,
+        expiresIn: ExpiresIn,
+        refreshToken: RefreshToken,
+        userDb,
       };
     } catch (e) {
       console.log(e);
@@ -144,16 +128,12 @@ export class UserController {
       if (e.statusCode && e.statusCode !== HttpStatus.INTERNAL_SERVER_ERROR) {
         return {
           status: e.statusCode,
-          message: 'Incorrect email or password.',
-          userLoginInfo: null,
-          errors: e.errors,
+          message: 'Invalid credentials',
         };
       }
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
-        userLoginInfo: null,
-        errors: e.errors,
       };
     }
   }
@@ -161,7 +141,7 @@ export class UserController {
   @MessagePattern('user_change_password')
   async changePassword(
     @Payload() changePasswordDto: ChangePasswordDto,
-  ): Promise<any> {
+  ): Promise<ChangePasswordResponseDto> {
     if (
       !changePasswordDto.email ||
       !changePasswordDto.currentPassword ||
@@ -169,28 +149,16 @@ export class UserController {
     ) {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'Missing data for change password',
-        user: null,
+        message: 'Bad or missing parameter.',
       };
     }
 
     try {
-      const changePassword = await this.userService.changePassword(
-        changePasswordDto,
-      );
-
-      if (!changePassword) {
-        return {
-          status: HttpStatus.UNAUTHORIZED,
-          message: 'something went wrong',
-          user: null,
-        };
-      }
+      await this.userService.changePassword(changePasswordDto);
 
       return {
         status: HttpStatus.OK,
         message: 'Password changed successfully',
-        user: null,
       };
     } catch (e) {
       console.log(e);
@@ -199,26 +167,23 @@ export class UserController {
         return {
           status: e.statusCode,
           message: e.message,
-          userLoginInfo: null,
-          errors: e.errors,
         };
       }
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
-        userLoginInfo: null,
-        errors: e.errors,
       };
     }
   }
 
   @MessagePattern('user_forgot_password')
-  async forgotPassword(@Payload() email: string): Promise<any> {
+  async forgotPassword(
+    @Payload() email: string,
+  ): Promise<ForgotPasswordResponseDto> {
     if (!email) {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-        user: null,
+        message: 'Bad or missing parameter',
       };
     }
 
@@ -237,15 +202,11 @@ export class UserController {
         return {
           status: e.statusCode,
           message: e.message,
-          userLoginInfo: null,
-          errors: e.errors,
         };
       }
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
-        userLoginInfo: null,
-        errors: e.errors,
       };
     }
   }
@@ -253,7 +214,7 @@ export class UserController {
   @MessagePattern('user_confirm_forgot_password')
   async confirnForgotPassword(
     @Payload() confirmForgotPasswordDto: ConfirmForgotPasswordDto,
-  ): Promise<any> {
+  ): Promise<ForgotPasswordResponseDto> {
     if (
       !confirmForgotPasswordDto.email ||
       !confirmForgotPasswordDto.password ||
@@ -262,7 +223,6 @@ export class UserController {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Bad request',
-        user: null,
       };
     }
 
@@ -272,7 +232,6 @@ export class UserController {
       return {
         status: HttpStatus.OK,
         message: 'Password changed successfully',
-        user: null,
       };
     } catch (e) {
       console.log(e);
@@ -281,54 +240,47 @@ export class UserController {
         return {
           status: e.statusCode,
           message: e.message,
-          userLoginInfo: null,
-          errors: e.errors,
         };
       }
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
-        userLoginInfo: null,
-        errors: e.errors,
       };
     }
   }
 
   @MessagePattern('user_refresh_token')
-  async userRefreshToken(@Payload() refreshToken: string): Promise<any> {
+  async userRefreshToken(
+    @Payload() refreshToken: string,
+  ): Promise<LoginResponseDto> {
     if (!refreshToken) {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Bad request',
-        user: null,
       };
     }
 
-    const token = await this.userService.refreshToken(refreshToken);
-
-    if (!token) {
-      return {
-        status: HttpStatus.UNAUTHORIZED,
-        message: 'Something went wrong',
-        user: null,
-      };
-    }
+    const { IdToken, AccessToken, ExpiresIn, RefreshToken } =
+      await this.userService.refreshToken(refreshToken);
 
     return {
       status: HttpStatus.OK,
-      message: 'token refresh successfully',
-      user: null,
+      message: 'successful token refresh',
+      idToken: IdToken,
+      accessToken: AccessToken,
+      expiresIn: ExpiresIn,
+      refreshToken: RefreshToken,
     };
   }
 
   @MessagePattern('logout')
-  async logOut(@Payload() accessToken: string) {
+  async logOut(@Payload() accessToken: string): Promise<LogoutResponseDto> {
     try {
       await this.userService.logOut(accessToken);
 
       return {
         status: HttpStatus.OK,
-        message: 'Logout',
+        message: 'User is logged out',
       };
     } catch (e) {
       console.log(e);
@@ -337,15 +289,11 @@ export class UserController {
         return {
           status: e.statusCode,
           message: e.message,
-          userLoginInfo: null,
-          errors: e.errors,
         };
       }
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
-        userLoginInfo: null,
-        errors: e.errors,
       };
     }
   }

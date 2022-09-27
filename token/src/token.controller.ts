@@ -36,7 +36,7 @@ export class TokenController {
             status: mindBodyTokenResponse.status,
             message: mindBodyTokenResponse.message,
             token: null,
-            minbodyToken: null,
+            mindBodyToken: null,
             errors: mindBodyTokenResponse.errors,
           };
         }
@@ -45,7 +45,7 @@ export class TokenController {
           status: HttpStatus.CREATED,
           message: 'Token created successfully',
           token,
-          minbodyToken: mindBodyTokenResponse.minbodyToken,
+          mindBodyToken: mindBodyTokenResponse.mindBodyToken,
           errors: null,
         };
       }
@@ -84,7 +84,7 @@ export class TokenController {
       return {
         status: HttpStatus.CREATED,
         message: 'Token created successfully',
-        minbodyToken: data.AccessToken,
+        mindBodyToken: data.AccessToken,
         errors: null,
       };
     } catch (e) {
@@ -95,7 +95,7 @@ export class TokenController {
       if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
         return {
           status: response.status,
-          minbodyToken: null,
+          mindBodyToken: null,
           message: message,
           errors: e.errors,
         };
@@ -104,29 +104,27 @@ export class TokenController {
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
-        minbodyToken: null,
+        mindBodyToken: null,
         errors: e.errors,
       };
     }
   }
 
   @MessagePattern('validate_token')
-  async decodeToken(
-    @Payload() decodeTokenDto: DecodeTokenDto,
-  ): Promise<DecodeTokenResponseDto> {
+  async decodeToken(@Payload() decodeTokenDto: DecodeTokenDto): Promise<any> {
     const tokenData = this.tokenService.validateToken(decodeTokenDto.token);
 
-    if (!tokenData) {
-      return {
-        status: HttpStatus.UNAUTHORIZED,
-        message: 'Unauthorized',
-        userId: null,
-      };
-    }
+    // if (!tokenData) {
+    //   return {
+    //     status: HttpStatus.UNAUTHORIZED,
+    //     message: 'Unauthorized',
+    //     userId: null,
+    //   };
+    // }
     return {
       status: HttpStatus.OK,
       message: 'Token validate',
-      userId: tokenData,
+      tokenData,
     };
   }
 }

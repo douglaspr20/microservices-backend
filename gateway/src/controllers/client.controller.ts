@@ -12,10 +12,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { AuthGuard } from '@nestjs/passport';
 import { firstValueFrom } from 'rxjs';
 import { GetUserRequest } from '../decorators';
 import { IUser } from '../interfaces/user';
-import { AuthGuard } from '../guards/auth.guard';
 import {
   CreateClientDto,
   CreateClientResponseDto,
@@ -27,7 +27,7 @@ import {
 } from '../interfaces/client';
 import { AppService } from '../services/app.service';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard('jwt'))
 @Controller('clients')
 export class ClientController {
   constructor(

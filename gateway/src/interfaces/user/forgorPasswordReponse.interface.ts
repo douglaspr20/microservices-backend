@@ -1,4 +1,4 @@
-export interface IUserCreateResponse {
+export class IForgotPasswordResponse {
   status: number;
   message: string;
 }

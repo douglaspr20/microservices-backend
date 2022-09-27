@@ -13,6 +13,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { AuthGuard } from '@nestjs/passport';
 import { firstValueFrom } from 'rxjs';
 import {
   AddPatientDto,
@@ -28,9 +29,8 @@ import {
   UpdatePatientDto,
   UpdatePatientResponseDto,
 } from '../interfaces/patient';
-import { AuthGuard } from '../guards';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard('jwt'))
 @Controller('patients')
 export class PatientController {
   constructor(

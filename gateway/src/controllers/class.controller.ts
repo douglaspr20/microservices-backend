@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { AuthGuard } from '../guards/auth.guard';
 import {
   AddClientToClassDto,
   AddClientToClassResponseDto,
@@ -24,8 +23,9 @@ import {
 } from '../interfaces/class';
 import { IUser } from '../interfaces/user';
 import { GetUserRequest } from '../decorators';
+import { AuthGuard } from '@nestjs/passport';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard('jwt'))
 @Controller('classes')
 export class ClassController {
   constructor(

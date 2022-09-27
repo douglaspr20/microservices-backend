@@ -1,4 +1,4 @@
-export interface IUserCreateResponse {
+export class LogoutResponseDto {
   status: number;
   message: string;
 }

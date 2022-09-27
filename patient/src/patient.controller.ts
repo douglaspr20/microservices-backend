@@ -13,6 +13,7 @@ import {
   GetSinglePatientResponseDto,
   IGetPatientsResponseCerbo,
   IPatient,
+  SearchPatientDto,
   UpdatePatientDto,
   UpdatePatientResponseDto,
 } from './interfaces';
@@ -34,6 +35,57 @@ export class PatientController {
       const { data } =
         await this.httpService.axiosRef.get<IGetPatientsResponseCerbo>(
           '/patients',
+        );
+
+      const { total_count, has_more, data: patients } = data;
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Patients Found',
+        data: {
+          total_count,
+          has_more,
+          patients,
+        },
+        errors: null,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      console.log(response);
+
+      const { error, message } = response.data as CerboErrorResponse;
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          data: null,
+          message: error ? error.message : message,
+          errors: e.errors,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        data: null,
+        errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('search_patient')
+  async searchPatient(
+    @Payload() searchPatientDto: SearchPatientDto,
+  ): Promise<GetPatientsResponseDto> {
+    this.httpService.axiosRef.defaults.params = {
+      ...searchPatientDto,
+    };
+
+    try {
+      const { data } =
+        await this.httpService.axiosRef.get<IGetPatientsResponseCerbo>(
+          '/patients/search',
         );
 
       const { total_count, has_more, data: patients } = data;

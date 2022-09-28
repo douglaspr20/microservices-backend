@@ -13,6 +13,9 @@ export interface IUser {
     zipCode: string;
     country: string;
   };
-  MindBodyToken?: string;
-  MindBodyClientId?: number;
+  mindBodyToken?: string;
+  mindBodyClientId?: number;
+  cerboPatientId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

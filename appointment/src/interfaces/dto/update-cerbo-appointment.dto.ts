@@ -10,7 +10,7 @@ import { validStatus } from '../../types';
 
 export class UpdateCerboAppointmentDto {
   @IsNumberString()
-  appointment_id: number;
+  appointmentId: number;
 
   @IsDateString()
   @IsOptional()

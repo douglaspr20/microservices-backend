@@ -35,7 +35,7 @@ export class SaleController {
     const getProductsResponse: IGetProductResponse = await firstValueFrom(
       this.saleServiceClient.send('get_products', {
         ...queryParams,
-        mindBodyAuthorization: user.MindBodyToken,
+        mindBodyAuthorization: user.mindBodyToken,
       }),
     );
 

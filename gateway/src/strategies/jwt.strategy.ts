@@ -1,12 +1,18 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ClientProxy } from '@nestjs/microservices';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
+import { IUserSearchResponse } from '../interfaces/user';
 import { ConfigService } from '../services/config.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
+  ) {
     const { clientId, userPoolId, region } = configService.get('cognito');
 
     const authority = `https://cognito-idp.${region}.amazonaws.com/${userPoolId}`;
@@ -27,8 +33,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   public async validate(payload: any) {
-    if (!payload.email_verified) return false;
+    const getUserResponse: IUserSearchResponse = await firstValueFrom(
+      this.userServiceClient.send('search_user_by_email', {
+        email: payload.email,
+      }),
+    );
 
-    return !!payload.sub;
+    if (!payload.email_verified || !payload.sub) return false;
+
+    return getUserResponse.user;
   }
 }

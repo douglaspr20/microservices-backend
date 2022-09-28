@@ -3,7 +3,6 @@ import {
   IsEmail,
   MinLength,
   IsNumber,
-  Min,
   IsOptional,
   IsObject,
 } from 'class-validator';
@@ -32,16 +31,21 @@ export class UpdateUserDto {
   @IsOptional()
   birthdate: string;
 
-  @IsNumber()
-  @IsOptional()
-  @Min(100000, {
-    message: 'the WorkPhone must have a minimum length of 6 digits.',
+  @IsString()
+  @MinLength(6, {
+    message: 'the mobile phone must have a minimum length of 6 digits.',
   })
   mobilePhone: number;
 
   @IsObject()
   @IsOptional()
-  address: string;
+  address: {
+    streetAddress: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
 
   @IsString()
   @IsOptional()

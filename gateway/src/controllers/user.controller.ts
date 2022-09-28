@@ -26,12 +26,17 @@ import {
   ForgotPasswordResponseDto,
   LogoutResponseDto,
   ILogoutResponse,
+  IUpdateUserResponse,
+  RefreshUserTokenDto,
+  ILoginResponse,
+  LoginResponseDto,
 } from '../interfaces/user';
 import { ICreateMindBodyToken } from '../interfaces/token';
 
 import { GetRequestHeaderParam, GetUserRequest } from '../decorators';
 import {
   IClientAddedResponse,
+  IClientUpdateResponse,
   IGetClientsResponse,
 } from 'src/interfaces/client';
 import {
@@ -55,7 +60,8 @@ export class UserController {
     return {
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.gender,
+      email: user.email,
+      gender: user.gender,
       birthdate: user.birthdate,
       mobilePhone: user.mobilePhone,
       address: user.address,
@@ -67,31 +73,73 @@ export class UserController {
   async updateUser(
     @Body() updateUserDto: UpdateUserDto,
     @GetUserRequest() user: IUser,
-  ): Promise<any> {
-    const updateUserReponse: any = await firstValueFrom(
+  ): Promise<IUser> {
+    const { mindBodyToken, mindBodyClientId, cerboPatientId } = user;
+
+    const [updateClientResponse, updatePatientResponse]: [
+      IClientUpdateResponse,
+      IAddPatientResponse,
+    ] = await Promise.all([
+      firstValueFrom(
+        this.clientServiceClient.send('update_client', {
+          Email: updateUserDto.email,
+          FirstName: updateUserDto.firstName,
+          LastName: updateUserDto.lastName,
+          State: updateUserDto.address.state,
+          WorkPhone: updateUserDto.mobilePhone,
+          Birthdate: updateUserDto.birthdate,
+          mindBodyAuthorization: mindBodyToken,
+          clientId: mindBodyClientId,
+        }),
+      ),
+      firstValueFrom(
+        this.patientServiceClient.send('update_patient', {
+          first_name: updateUserDto.firstName,
+          last_name: updateUserDto.lastName,
+          dob: updateUserDto.birthdate,
+          sex: updateUserDto.gender.substring(0, 1),
+          email1: updateUserDto.email,
+          patientId: cerboPatientId,
+        }),
+      ),
+    ]);
+
+    if (
+      updateClientResponse.status !== HttpStatus.OK ||
+      updatePatientResponse.status !== HttpStatus.OK
+    ) {
+      throw new HttpException(
+        {
+          message:
+            updateClientResponse.status !== HttpStatus.OK
+              ? updateClientResponse.message
+              : updatePatientResponse.message,
+        },
+        updateClientResponse.status !== HttpStatus.OK
+          ? updateClientResponse.status
+          : updatePatientResponse.status,
+      );
+    }
+
+    const updateUserReponse: IUpdateUserResponse = await firstValueFrom(
       this.userServiceClient.send('user_update', {
         ...updateUserDto,
         userId: user.id,
       }),
     );
 
-    if (updateUserReponse.status !== HttpStatus.CREATED) {
+    if (updateUserReponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
           message: updateUserReponse.message,
           data: null,
-          errors: updateUserReponse.errors,
         },
         updateUserReponse.status,
       );
     }
 
     return {
-      message: updateUserReponse.message,
-      data: {
-        user: updateUserReponse.user,
-      },
-      errors: null,
+      ...updateUserReponse.user,
     };
   }
 
@@ -257,7 +305,7 @@ export class UserController {
       );
     }
 
-    const userLoginResponse: any = await firstValueFrom(
+    const userLoginResponse: ILoginResponse = await firstValueFrom(
       this.userServiceClient.send('user_login', {
         ...loginUserDto,
       }),
@@ -268,7 +316,6 @@ export class UserController {
         {
           message: userLoginResponse.message,
           data: null,
-          errors: userLoginResponse.errors,
         },
         userLoginResponse.status,
       );
@@ -395,6 +442,37 @@ export class UserController {
 
     return {
       message: logoutResponse.message,
+    };
+  }
+
+  @Post('auth/refreshToken')
+  @UseGuards(AuthGuard('jwt'))
+  async refreshToken(
+    @Body() refreshUserTokenDto: RefreshUserTokenDto,
+    @GetUserRequest() user: IUser,
+  ): Promise<LoginResponseDto> {
+    const refreshTokenReponse: ILoginResponse = await firstValueFrom(
+      this.userServiceClient.send('user_refresh_token', {
+        refreshToken: refreshUserTokenDto.refreshToken,
+        email: user.email,
+      }),
+    );
+
+    if (refreshTokenReponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: refreshTokenReponse.message,
+        },
+        refreshTokenReponse.status,
+      );
+    }
+
+    return {
+      message: refreshTokenReponse.message,
+      idToken: refreshTokenReponse.idToken,
+      accessToken: refreshTokenReponse.accessToken,
+      expiresIn: refreshTokenReponse.expiresIn,
+      refreshToken: refreshTokenReponse.refreshToken,
     };
   }
 }

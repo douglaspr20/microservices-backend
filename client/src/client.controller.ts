@@ -221,7 +221,7 @@ export class ClientController {
         ...updateClientDto,
         Client: {
           ...updateClientDto.Client,
-          Id: clientId,
+          Id: `${clientId}`,
         },
       });
 

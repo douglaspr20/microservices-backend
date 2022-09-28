@@ -31,6 +31,23 @@ export class UserService {
     });
   }
 
+  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const userToUpdate = await this.userRepository.findOneBy({ id });
+
+    if (!userToUpdate) {
+      return null;
+    }
+
+    const result = await this.userRepository.update(
+      { id },
+      {
+        ...updateUserDto,
+      },
+    );
+
+    return result.raw;
+  }
+
   async register(createUserDto: CreateUserDto) {
     const { email, password } = createUserDto;
 
@@ -83,7 +100,7 @@ export class UserService {
     await this.userRepository.save(newUser);
 
     delete newUser.mindBodyToken;
-    delete newUser.mindbodyClientId;
+    delete newUser.mindBodyClientId;
     delete newUser.cerboPatientId;
 
     return newUser;
@@ -176,17 +193,27 @@ export class UserService {
       .promise();
   }
 
-  async refreshToken(refreshToken: string) {
-    const { clientId } = this.configService.get('cognito');
+  async refreshToken(payload: { refreshToken: string; email: string }) {
+    const { clientId, clientSecret, userPoolId } =
+      this.configService.get('cognito');
+
+    const { email } = payload;
 
     const cognito = new this.aws.CognitoIdentityServiceProvider();
 
+    const hash = crypto
+      .createHmac('sha256', clientSecret)
+      .update(email + clientId)
+      .digest('base64');
+
     const initAuthResponse = await cognito
-      .initiateAuth({
+      .adminInitiateAuth({
+        UserPoolId: userPoolId,
         ClientId: clientId,
-        AuthFlow: 'REFRESH_TOKEN ',
+        AuthFlow: 'REFRESH_TOKEN',
         AuthParameters: {
-          REFRESH_TOKEN: refreshToken,
+          REFRESH_TOKEN: payload.refreshToken,
+          SECRET_HASH: hash,
         },
       })
       .promise();
@@ -218,22 +245,5 @@ export class UserService {
     const user = await this.userRepository.findOneBy({ id });
 
     return user;
-  }
-
-  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const userToUpdate = await this.userRepository.findOneBy({ id });
-
-    if (!userToUpdate) {
-      return null;
-    }
-
-    const result = await this.userRepository.update(
-      { id },
-      {
-        ...updateUserDto,
-      },
-    );
-
-    return result.raw;
   }
 }

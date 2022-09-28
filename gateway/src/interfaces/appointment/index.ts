@@ -8,4 +8,7 @@ export * from './getSingleCerboAppointment.interface';
 export * from './updateCerboAppointmentResponse.interface';
 export * from './deleteCerboAppointment.interface';
 export * from './getCerboAppointmentTypes.interface';
+export * from './getMindBodyAppointment.interface';
+export * from './getSingleMindBodyAppointment.interface';
+export * from './updateMindBodyAppointment.interface';
 export * from './dto';

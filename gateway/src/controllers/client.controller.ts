@@ -43,7 +43,7 @@ export class ClientController {
     const createdClientResponse: IClientAddedResponse = await firstValueFrom(
       this.clientServiceClient.send('add_client', {
         ...createClientDto,
-        mindbodyauthorization: user.MindBodyToken,
+        mindbodyauthorization: user.mindBodyToken,
       }),
     );
 
@@ -77,7 +77,7 @@ export class ClientController {
         limit,
         offset,
         searchText,
-        mindbodyauthorization: user.MindBodyToken,
+        mindbodyauthorization: user.mindBodyToken,
       }),
     );
 
@@ -107,7 +107,7 @@ export class ClientController {
     const getClientReponse: IGetClientsResponse = await firstValueFrom(
       this.clientServiceClient.send('get_client_by_id', {
         clientId,
-        mindbodyauthorization: user.MindBodyToken,
+        mindbodyauthorization: user.mindBodyToken,
       }),
     );
 
@@ -139,7 +139,7 @@ export class ClientController {
       this.clientServiceClient.send('update_client', {
         ...updateClientDto,
         clientId,
-        mindBodyAuthorization: user.MindBodyToken,
+        mindBodyAuthorization: user.mindBodyToken,
       }),
     );
 

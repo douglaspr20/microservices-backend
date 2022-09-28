@@ -1,6 +1,5 @@
 import {
   IsDateString,
-  IsNumber,
   IsNumberString,
   IsOptional,
   IsString,
@@ -23,11 +22,11 @@ export class GetCerboAppointmentsDto {
   @IsDateString()
   end_date: string;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
   provider_id?: number;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
   pt_id?: number;
 

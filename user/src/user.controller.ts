@@ -16,11 +16,47 @@ import {
   ChangePasswordResponseDto,
   ForgotPasswordResponseDto,
   LogoutResponseDto,
+  SearchUserEmailDto,
+  UpdateUserResponseDto,
 } from './interfaces';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @MessagePattern('update_user')
+  async updateUser(
+    @Payload() updateUserDto: UpdateUserDto,
+  ): Promise<UpdateUserResponseDto> {
+    if (!updateUserDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Bad or missing parameter',
+      };
+    }
+
+    const { id } = updateUserDto;
+
+    const user = await this.userService.updateUser(id, updateUserDto);
+
+    if (!user) {
+      return {
+        status: HttpStatus.NOT_FOUND,
+        message: 'User not found',
+        user: null,
+      };
+    }
+
+    delete user.mindBodyClientId;
+    delete user.mindBodyToken;
+    delete user.cerboPatientId;
+
+    return {
+      status: HttpStatus.OK,
+      message: 'User updated successfully',
+      user: user,
+    };
+  }
 
   @MessagePattern('user_register')
   async register(
@@ -251,9 +287,9 @@ export class UserController {
 
   @MessagePattern('user_refresh_token')
   async userRefreshToken(
-    @Payload() refreshToken: string,
+    @Payload() payload: { refreshToken: string; email: string },
   ): Promise<LoginResponseDto> {
-    if (!refreshToken) {
+    if (!payload) {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Bad request',
@@ -261,7 +297,7 @@ export class UserController {
     }
 
     const { IdToken, AccessToken, ExpiresIn, RefreshToken } =
-      await this.userService.refreshToken(refreshToken);
+      await this.userService.refreshToken(payload);
 
     return {
       status: HttpStatus.OK,
@@ -323,7 +359,7 @@ export class UserController {
 
       return {
         status: HttpStatus.OK,
-        message: 'User login successfully',
+        message: 'User Found',
         user: user,
       };
     } catch (e) {
@@ -337,11 +373,11 @@ export class UserController {
     }
   }
 
-  @MessagePattern('update_user')
-  async updateUser(
-    @Payload() updateUserDto: UpdateUserDto,
+  @MessagePattern('search_user_by_email')
+  async searchUserByEmail(
+    @Payload() searchUserEmailDto: SearchUserEmailDto,
   ): Promise<IUserSearchResponse> {
-    if (!updateUserDto) {
+    if (!searchUserEmailDto) {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Bad request, data missing',
@@ -349,22 +385,32 @@ export class UserController {
       };
     }
 
-    const { id } = updateUserDto;
+    try {
+      const user = await this.userService.searchUserByEmail(
+        searchUserEmailDto.email,
+      );
 
-    const user = await this.userService.updateUser(id, updateUserDto);
+      if (!user) {
+        return {
+          status: HttpStatus.NOT_FOUND,
+          message: 'User not found',
+          user: null,
+        };
+      }
 
-    if (!user) {
       return {
-        status: HttpStatus.NOT_FOUND,
-        message: 'User not found',
+        status: HttpStatus.OK,
+        message: 'User login successfully',
+        user: user,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
         user: null,
+        errors: e.errors,
       };
     }
-
-    return {
-      status: HttpStatus.OK,
-      message: 'User updated successfully',
-      user: user,
-    };
   }
 }

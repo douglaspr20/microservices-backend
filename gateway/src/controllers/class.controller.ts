@@ -42,7 +42,7 @@ export class ClassController {
       this.classServiceClient.send('get_classes', {
         limit,
         offset,
-        mindBodyAuthorization: user.MindBodyToken,
+        mindBodyAuthorization: user.mindBodyToken,
       }),
     );
 
@@ -73,7 +73,7 @@ export class ClassController {
       await firstValueFrom(
         this.classServiceClient.send('class_descriptions', {
           ...queryParams,
-          mindBodyAuthorization: user.MindBodyToken,
+          mindBodyAuthorization: user.mindBodyToken,
         }),
       );
 
@@ -104,7 +104,7 @@ export class ClassController {
       await firstValueFrom(
         this.classServiceClient.send('add_client_to_class', {
           ...addClientToClassDto,
-          mindBodyAuthorization: user.MindBodyToken,
+          mindBodyAuthorization: user.mindBodyToken,
         }),
       );
 

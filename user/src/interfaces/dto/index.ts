@@ -10,3 +10,5 @@ export * from './confirm-create-user-response.dto';
 export * from './login-response.dto';
 export * from './forgot-password-response.dto';
 export * from './logout-response.dto';
+export * from './search-user-email.dto';
+export * from './update-user-response.dto';

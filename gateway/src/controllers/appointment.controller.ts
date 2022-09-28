@@ -111,11 +111,16 @@ export class AppointmentController {
   }
 
   @Get('health')
-  async getAppointmentsWellness(@Query() queryParams: GetCerboAppointmentsDto) {
+  async getAppointmentsWellness(
+    @Query() queryParams: GetCerboAppointmentsDto,
+    @GetUserRequest() user: IUser,
+  ) {
+    console.log(user);
     const getCerboAppointmentResponse: IGetCerboAppointmentsResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('get_cerbo_appointments_range_date', {
           ...queryParams,
+          pt_id: user.cerboPatientId,
         }),
       );
 
@@ -379,7 +384,7 @@ export class AppointmentController {
   ): Promise<UpdateMindBodyAppointmentResponseDto> {
     const updateMindBodyAppointmentResponse: IUpdateMindBodyAppointmentResponse =
       await firstValueFrom(
-        this.appoitmentServiceClient.send('update_mindboy_appointment', {
+        this.appoitmentServiceClient.send('update_mindbody_appointment', {
           appointmentId,
           mindBodyAuthorization: user.mindBodyToken,
           ...updateMindBodyAppointmentDto,

@@ -17,11 +17,46 @@ import {
   ForgotPasswordResponseDto,
   LogoutResponseDto,
   SearchUserEmailDto,
+  UpdateUserResponseDto,
 } from './interfaces';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @MessagePattern('update_user')
+  async updateUser(
+    @Payload() updateUserDto: UpdateUserDto,
+  ): Promise<UpdateUserResponseDto> {
+    if (!updateUserDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Bad or missing parameter',
+      };
+    }
+
+    const { id } = updateUserDto;
+
+    const user = await this.userService.updateUser(id, updateUserDto);
+
+    if (!user) {
+      return {
+        status: HttpStatus.NOT_FOUND,
+        message: 'User not found',
+        user: null,
+      };
+    }
+
+    delete user.mindBodyClientId;
+    delete user.mindBodyToken;
+    delete user.cerboPatientId;
+
+    return {
+      status: HttpStatus.OK,
+      message: 'User updated successfully',
+      user: user,
+    };
+  }
 
   @MessagePattern('user_register')
   async register(
@@ -252,9 +287,9 @@ export class UserController {
 
   @MessagePattern('user_refresh_token')
   async userRefreshToken(
-    @Payload() refreshToken: string,
+    @Payload() payload: { refreshToken: string; email: string },
   ): Promise<LoginResponseDto> {
-    if (!refreshToken) {
+    if (!payload) {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Bad request',
@@ -262,7 +297,7 @@ export class UserController {
     }
 
     const { IdToken, AccessToken, ExpiresIn, RefreshToken } =
-      await this.userService.refreshToken(refreshToken);
+      await this.userService.refreshToken(payload);
 
     return {
       status: HttpStatus.OK,
@@ -377,36 +412,5 @@ export class UserController {
         errors: e.errors,
       };
     }
-  }
-
-  @MessagePattern('update_user')
-  async updateUser(
-    @Payload() updateUserDto: UpdateUserDto,
-  ): Promise<IUserSearchResponse> {
-    if (!updateUserDto) {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'Bad request, data missing',
-        user: null,
-      };
-    }
-
-    const { id } = updateUserDto;
-
-    const user = await this.userService.updateUser(id, updateUserDto);
-
-    if (!user) {
-      return {
-        status: HttpStatus.NOT_FOUND,
-        message: 'User not found',
-        user: null,
-      };
-    }
-
-    return {
-      status: HttpStatus.OK,
-      message: 'User updated successfully',
-      user: user,
-    };
   }
 }

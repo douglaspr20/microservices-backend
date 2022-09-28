@@ -2,11 +2,9 @@ import {
   IsString,
   IsEmail,
   MinLength,
-  MaxLength,
-  Matches,
   IsNumber,
-  IsDate,
   IsOptional,
+  IsObject,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -16,48 +14,51 @@ export class UpdateUserDto {
   @IsString()
   @MinLength(2)
   @IsOptional()
-  FirstName: string;
+  firstName: string;
 
   @IsString()
   @MinLength(2)
   @IsOptional()
-  LastName: string;
+  lastName: string;
 
   @IsString()
   @IsEmail()
   @IsOptional()
-  Email: string;
+  email: string;
 
   @IsString()
-  @IsEmail()
   @IsOptional()
-  State: string;
+  gender: string;
+
+  @IsString()
+  @IsOptional()
+  birthdate: string;
 
   @IsNumber()
-  @MinLength(8)
   @IsOptional()
-  WorkPhone: number;
-
-  @IsDate()
-  @IsEmail()
-  @IsOptional()
-  Birthdate: string;
-
-  @IsString()
-  @MinLength(8)
-  @MaxLength(50)
-  @IsOptional()
-  @Matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/, {
-    message:
-      'Minimum eight characters, at least one letter, one number and one special character:',
+  @MinLength(6, {
+    message: 'the mobile phone must have a minimum length of 6 digits.',
   })
-  Password: string;
+  mobilePhone: string;
+
+  @IsObject()
+  @IsOptional()
+  address: {
+    streetAddress: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
 
   @IsString()
   @IsOptional()
-  MindBodyToken: string;
+  mindBodyToken: string;
 
   @IsNumber()
   @IsOptional()
-  MindBodyClientId: number;
+  mindBodyClientId: string;
+
+  @IsString()
+  cerboPatientId?: string;
 }

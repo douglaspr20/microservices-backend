@@ -4,8 +4,6 @@ import {
   MinLength,
   MaxLength,
   Matches,
-  IsNumber,
-  Min,
   IsObject,
   IsNotEmptyObject,
   IsDateString,
@@ -32,12 +30,11 @@ export class CreateUserDto {
   @IsDateString()
   birthdate: string;
 
-  @IsNumber()
-  @Min(100000, {
-    message: 'the WorkPhone must have a minimum length of 6 digits.',
+  @IsString()
+  @MinLength(6, {
+    message: 'the mobile phone must have a minimum length of 6 digits.',
   })
-  mobilePhone: number;
-
+  mobilePhone: string;
   @IsObject()
   @IsNotEmptyObject()
   address: {

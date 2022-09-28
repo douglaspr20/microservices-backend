@@ -13,7 +13,7 @@ import {
   GetCerboAppointmentsResponseDto,
   GetCerboAppointmentsTypesDto,
   GetCerboAppointmentsTypesResponseDto,
-  GetSingleCerboAppointmentDto,
+  GetSingleAppointmentDto,
   GetSingleCerboAppointmentResponseDto,
   IAppointmentCerbo,
   IDeleteAppointmentCerboResponse,
@@ -21,6 +21,10 @@ import {
   IGetAppointmentTypeResponseCerbo,
   UpdateCerboAppointmentResponseDto,
   UpdateCerboAppointmentDto,
+  GetMindBodyAppointmentsDto,
+  GetMindBodyAppointmentsResponseDto,
+  UpdateMindBodyAppointmentDto,
+  UpdateMindBodyAppointmentResponseDto,
 } from './interfaces';
 import { CerboErrorResponse, MindBodyErrorResponse } from './types';
 import { ConfigService } from './services/config.service';
@@ -36,70 +40,6 @@ export class AppointmentController {
   cerboUrl = this.configService.get('cerboBaseUrl');
   cerboUsername = this.configService.get('cerboUsername');
   cerboSecretKey = this.configService.get('cerboSecretKey');
-
-  @MessagePattern('add_mindbody_appointment')
-  async addMindBodyAppointment(
-    @Payload() addAppointmentDto: AddAppointmentDto,
-  ): Promise<AddAppointmentResponseDto> {
-    const { mindBodyAuthorization } = addAppointmentDto;
-
-    if (!addAppointmentDto) {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'Missing data for add appointment',
-        data: null,
-        errors: null,
-      };
-    }
-
-    if (!mindBodyAuthorization || mindBodyAuthorization === '') {
-      return {
-        status: HttpStatus.FORBIDDEN,
-        message: 'forbidden resource',
-        data: null,
-        errors: null,
-      };
-    }
-
-    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      mindBodyAuthorization;
-
-    try {
-      const response = await this.httpService.axiosRef.post(
-        `${this.mindbodyUrl}/addappointment`,
-        addAppointmentDto,
-      );
-
-      return {
-        status: HttpStatus.OK,
-        message: 'Appointment Added',
-        data: response.data,
-        errors: null,
-      };
-    } catch (e) {
-      const { response } = e as AxiosError;
-
-      const { Error } = response.data as MindBodyErrorResponse;
-
-      console.log(response);
-
-      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
-        return {
-          status: response.status,
-          data: null,
-          message: Error.Message,
-          errors: e.errors,
-        };
-      }
-
-      return {
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Something went wrong',
-        data: null,
-        errors: e.errors,
-      };
-    }
-  }
 
   @MessagePattern('get_cerbo_appointments_range_date')
   async getCerboAppointmentsInDateRange(
@@ -159,9 +99,9 @@ export class AppointmentController {
 
   @MessagePattern('get_cerbo_single_appointment')
   async getCerboAppointment(
-    @Payload() getSingleCerboAppointmentDto: GetSingleCerboAppointmentDto,
+    @Payload() getSingleAppointmentDto: GetSingleAppointmentDto,
   ): Promise<GetSingleCerboAppointmentResponseDto> {
-    const { appointment_id } = getSingleCerboAppointmentDto;
+    const { appointmentId } = getSingleAppointmentDto;
     this.httpService.axiosRef.defaults.auth = {
       username: this.cerboUsername,
       password: this.cerboSecretKey,
@@ -169,7 +109,7 @@ export class AppointmentController {
 
     try {
       const { data } = await this.httpService.axiosRef.get<IAppointmentCerbo>(
-        `${this.cerboUrl}/appointments/${appointment_id}`,
+        `${this.cerboUrl}/appointments/${appointmentId}`,
       );
 
       return {
@@ -255,7 +195,7 @@ export class AppointmentController {
   async updateCerboAppointment(
     @Payload() updateCerboAppointmentDto: UpdateCerboAppointmentDto,
   ): Promise<UpdateCerboAppointmentResponseDto> {
-    const { appointment_id, ...rest } = updateCerboAppointmentDto;
+    const { appointmentId, ...rest } = updateCerboAppointmentDto;
     this.httpService.axiosRef.defaults.auth = {
       username: this.cerboUsername,
       password: this.cerboSecretKey,
@@ -263,7 +203,7 @@ export class AppointmentController {
 
     try {
       const { data } = await this.httpService.axiosRef.patch<IAppointmentCerbo>(
-        `${this.cerboUrl}/appointments/${appointment_id}`,
+        `${this.cerboUrl}/appointments/${appointmentId}`,
         {
           ...rest,
         },
@@ -304,7 +244,7 @@ export class AppointmentController {
   async deleteCerboAppointment(
     @Payload() deleteCerboAppointmentDto: DeleteCerboAppointmentDto,
   ): Promise<DeleteCerboAppointmentResponseDto> {
-    const { appointment_id } = deleteCerboAppointmentDto;
+    const { appointmentId } = deleteCerboAppointmentDto;
     this.httpService.axiosRef.defaults.auth = {
       username: this.cerboUsername,
       password: this.cerboSecretKey,
@@ -312,7 +252,7 @@ export class AppointmentController {
 
     try {
       await this.httpService.axiosRef.delete<IDeleteAppointmentCerboResponse>(
-        `${this.cerboUrl}/appointments/${appointment_id}`,
+        `${this.cerboUrl}/appointments/${appointmentId}`,
       );
 
       return {
@@ -395,6 +335,261 @@ export class AppointmentController {
         message: 'Something went wrong',
         data: null,
         errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('get_mindboy_appointments')
+  async getMindBodyAppointments(
+    @Payload() getMindBodyAppointmentsDto: GetMindBodyAppointmentsDto,
+  ): Promise<GetMindBodyAppointmentsResponseDto> {
+    const { mindBodyAuthorization, clientId } = getMindBodyAppointmentsDto;
+
+    if (!getMindBodyAppointmentsDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Missing or bad data for request',
+      };
+    }
+
+    if (!mindBodyAuthorization || mindBodyAuthorization === '' || !clientId) {
+      return {
+        status: HttpStatus.FORBIDDEN,
+        message: 'forbidden resource',
+      };
+    }
+
+    this.httpService.axiosRef.defaults.params = {
+      ...getMindBodyAppointmentsDto,
+    };
+
+    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
+      mindBodyAuthorization;
+
+    try {
+      const response = await this.httpService.axiosRef.get(
+        `${this.mindbodyUrl}/appointment/staffappointments`,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Appointments found',
+        data: response.data,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      const { Error } = response.data as MindBodyErrorResponse;
+
+      console.log(response);
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          data: null,
+          message: Error.Message,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        data: null,
+      };
+    }
+  }
+
+  @MessagePattern('add_mindbody_appointment')
+  async addMindBodyAppointment(
+    @Payload() addAppointmentDto: AddAppointmentDto,
+  ): Promise<AddAppointmentResponseDto> {
+    const { mindBodyAuthorization } = addAppointmentDto;
+
+    if (!addAppointmentDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Missing data for add appointment',
+        data: null,
+        errors: null,
+      };
+    }
+
+    if (!mindBodyAuthorization || mindBodyAuthorization === '') {
+      return {
+        status: HttpStatus.FORBIDDEN,
+        message: 'forbidden resource',
+        data: null,
+        errors: null,
+      };
+    }
+
+    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
+      mindBodyAuthorization;
+
+    try {
+      const response = await this.httpService.axiosRef.post(
+        `${this.mindbodyUrl}/addappointment`,
+        addAppointmentDto,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Appointment Added',
+        data: response.data,
+        errors: null,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      const { Error } = response.data as MindBodyErrorResponse;
+
+      console.log(response);
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          data: null,
+          message: Error.Message,
+          errors: e.errors,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        data: null,
+        errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('get_single_mindboy_appointment')
+  async getSingleMindBodyAppointment(
+    @Payload() getSingleAppointmentDto: GetSingleAppointmentDto,
+  ): Promise<GetMindBodyAppointmentsResponseDto> {
+    const { mindBodyAuthorization, appointmentId } = getSingleAppointmentDto;
+
+    if (!getSingleAppointmentDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Missing or bad data for request',
+      };
+    }
+
+    if (
+      !mindBodyAuthorization ||
+      mindBodyAuthorization === '' ||
+      !appointmentId
+    ) {
+      return {
+        status: HttpStatus.FORBIDDEN,
+        message: 'forbidden resource',
+      };
+    }
+
+    this.httpService.axiosRef.defaults.params = {
+      appointmentIds: appointmentId,
+    };
+
+    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
+      mindBodyAuthorization;
+
+    try {
+      const response = await this.httpService.axiosRef.get(
+        `${this.mindbodyUrl}/appointment/staffappointments`,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Appointment found',
+        data: response.data.Appointments[0],
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      const { Error } = response.data as MindBodyErrorResponse;
+
+      console.log(response);
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          data: null,
+          message: Error.Message,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        data: null,
+      };
+    }
+  }
+
+  @MessagePattern('update_mindbody_appointment')
+  async updateMindBodyAppointment(
+    @Payload() updateMindBodyAppointmentDto: UpdateMindBodyAppointmentDto,
+  ): Promise<UpdateMindBodyAppointmentResponseDto> {
+    const { mindBodyAuthorization, appointmentId } =
+      updateMindBodyAppointmentDto;
+
+    if (!updateMindBodyAppointmentDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Missing or bad data for request',
+        data: null,
+      };
+    }
+
+    if (
+      !mindBodyAuthorization ||
+      mindBodyAuthorization === '' ||
+      !appointmentId
+    ) {
+      return {
+        status: HttpStatus.FORBIDDEN,
+        message: 'forbidden resource',
+        data: null,
+      };
+    }
+
+    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
+      mindBodyAuthorization;
+
+    try {
+      const response = await this.httpService.axiosRef.post(
+        `${this.mindbodyUrl}/appointment/updateappointment`,
+        {
+          AppointmentId: appointmentId,
+          ...updateMindBodyAppointmentDto,
+        },
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Appointment Updated',
+        data: response.data.Appointments[0],
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      const { Error } = response.data as MindBodyErrorResponse;
+
+      console.log(response);
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          data: null,
+          message: Error.Message,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        data: null,
       };
     }
   }

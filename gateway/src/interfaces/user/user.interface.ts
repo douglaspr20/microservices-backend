@@ -13,6 +13,6 @@ export interface IUser {
     zipCode: string;
     country: string;
   };
-  MindBodyToken?: string;
-  MindBodyClientId?: number;
+  mindBodyToken?: string;
+  mindBodyClientId?: number;
 }

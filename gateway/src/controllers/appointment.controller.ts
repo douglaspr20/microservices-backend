@@ -35,49 +35,72 @@ import {
   GetCerboAppointmentsTypesDto,
   GetCerboAppointmentsTypesResponseDto,
   IGetCerboAppointmentsTypesResponse,
+  GetMindBodyAppointmentsDto,
+  IGetMindBodyAppointmentsResponse,
+  GetMindBodyAppointmentsResponseDto,
+  ISingleMindBodyAppointmentResponse,
+  GetSingleMindBodyhAppointmentReponseDto,
+  UpdateMindBodyAppointmentDto,
+  IUpdateMindBodyAppointmentResponse,
+  UpdateMindBodyAppointmentResponseDto,
 } from '../interfaces/appointment';
 import { AuthGuard } from '@nestjs/passport';
 
 @UseGuards(AuthGuard('jwt'))
-@Controller('appointments')
+@Controller('appointment')
 export class AppointmentController {
   constructor(
     @Inject('APPOINTMENT_SERVICE')
     private readonly appoitmentServiceClient: ClientProxy,
   ) {}
 
-  @Post()
-  async addAppointment(
-    @Body() addAppointmentDto: AddAppointmentDto,
-    @GetUserRequest() user: IUser,
-  ): Promise<AddAppointmentResponseDto> {
-    const addAppoimentResponse: IAppointmentAddedResponse =
+  @Get()
+  async getAppointments(@GetUserRequest() user: IUser): Promise<any> {
+    const getCerboAppointmentResponse: IGetCerboAppointmentsResponse =
       await firstValueFrom(
-        this.appoitmentServiceClient.send('add_appointment', {
-          ...addAppointmentDto,
-          mindBodyAuthorization: user.MindBodyToken,
+        this.appoitmentServiceClient.send(
+          'get_cerbo_appointments_range_date',
+          {},
+        ),
+      );
+
+    const getMindBodyAppointmentResponse: IGetMindBodyAppointmentsResponse =
+      await firstValueFrom(
+        this.appoitmentServiceClient.send('get_mindboy_appointments', {
+          mindBodyAuthorization: user.mindBodyToken,
+          clientId: user.mindBodyClientId,
         }),
       );
 
-    if (addAppoimentResponse.status !== HttpStatus.OK) {
+    if (getCerboAppointmentResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
-          message: addAppoimentResponse.message,
+          message: getCerboAppointmentResponse.message,
           data: null,
-          errors: addAppoimentResponse.errors,
+          errors: getCerboAppointmentResponse.errors,
         },
-        addAppoimentResponse.status,
+        getCerboAppointmentResponse.status,
       );
     }
 
+    if (getMindBodyAppointmentResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getMindBodyAppointmentResponse.message,
+        },
+        getMindBodyAppointmentResponse.status,
+      );
+    }
+
+    getCerboAppointmentResponse.data.appointments;
+
     return {
-      message: addAppoimentResponse.message,
-      data: addAppoimentResponse.data,
-      errors: null,
+      healthAppointments: getCerboAppointmentResponse.data.appointments,
+      wellnessAppointments: getMindBodyAppointmentResponse.data.Appointments,
     };
   }
 
-  @Get('wellness')
+  @Get('health')
   async getAppointmentsWellness(@Query() queryParams: GetCerboAppointmentsDto) {
     const getCerboAppointmentResponse: IGetCerboAppointmentsResponse =
       await firstValueFrom(
@@ -104,7 +127,7 @@ export class AppointmentController {
     };
   }
 
-  @Get('wellness/types')
+  @Get('health/type')
   async getAppointmentWellnessTypes(
     @Query() queryParams: GetCerboAppointmentsTypesDto,
   ): Promise<GetCerboAppointmentsTypesResponseDto> {
@@ -133,14 +156,14 @@ export class AppointmentController {
     };
   }
 
-  @Get('wellness/:appointment_id')
+  @Get('health/:appointmentId')
   async getSingleAppointmentWellness(
-    @Param('appointment_id') appointment_id: number,
+    @Param('appointmentId') appointmentId: number,
   ): Promise<GetSingleCerboAppointmentResponseDto> {
     const getSingleCerboAppointmentResponse: ISingleCerboAppointmentResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('get_cerbo_single_appointment', {
-          appointment_id,
+          appointmentId,
         }),
       );
     if (getSingleCerboAppointmentResponse.status !== HttpStatus.OK) {
@@ -160,7 +183,7 @@ export class AppointmentController {
     };
   }
 
-  @Post('wellness')
+  @Post('health')
   async addAppointmentWellness(
     @Body() addCerboAppointmentDto: AddCerboAppointmentDto,
   ): Promise<AddAppointmentCerboResponseDto> {
@@ -189,16 +212,16 @@ export class AppointmentController {
     };
   }
 
-  @Put('wellness/:appointment_id')
-  async updateAppointmentWellness(
-    @Param('appointment_id') appointment_id: number,
+  @Put('health/:appointmentId')
+  async updateAppointmentHealth(
+    @Param('appointmentId') appointmentId: number,
     @Body() updateCerboAppointmentDto: UpdateCerboAppointmentDto,
   ): Promise<UpdateCerboAppointmentResponseDto> {
     const updateAppoimentCerboResponse: IUpdateCerboAppointmentResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('update_cerbo_appointment', {
           ...updateCerboAppointmentDto,
-          appointment_id,
+          appointmentId,
         }),
       );
 
@@ -220,14 +243,14 @@ export class AppointmentController {
     };
   }
 
-  @Delete('wellness/:appointment_id')
+  @Delete('health/:appointmentId')
   async deleteAppointmentWellness(
-    @Param('appointment_id') appointment_id: number,
+    @Param('appointmentId') appointmentId: number,
   ): Promise<DeleteCerboAppointmentResponseDto> {
     const deleteAppoimentCerboResponse: IDeleteCerboAppointmentResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('delete_cerbo_appointment', {
-          appointment_id,
+          appointmentId,
         }),
       );
 
@@ -244,6 +267,126 @@ export class AppointmentController {
     return {
       message: deleteAppoimentCerboResponse.message,
       errors: null,
+    };
+  }
+
+  @Get('wellness')
+  async getAppointmentsHealth(
+    @Query() getMindBodyAppointmentsDto: GetMindBodyAppointmentsDto,
+    @GetUserRequest() user: IUser,
+  ): Promise<GetMindBodyAppointmentsResponseDto> {
+    const getMindBodyAppointmentResponse: IGetMindBodyAppointmentsResponse =
+      await firstValueFrom(
+        this.appoitmentServiceClient.send('get_mindboy_appointments', {
+          ...getMindBodyAppointmentsDto,
+          mindBodyAuthorization: user.mindBodyToken,
+          clientId: user.mindBodyClientId,
+        }),
+      );
+
+    if (getMindBodyAppointmentResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getMindBodyAppointmentResponse.message,
+        },
+        getMindBodyAppointmentResponse.status,
+      );
+    }
+
+    return {
+      message: getMindBodyAppointmentResponse.message,
+      data: {
+        healthAppointments: getMindBodyAppointmentResponse.data.Appointments,
+        paginationResponse:
+          getMindBodyAppointmentResponse.data.PaginationResponse,
+      },
+    };
+  }
+
+  @Post('wellness')
+  async addAppointment(
+    @Body() addAppointmentDto: AddAppointmentDto,
+    @GetUserRequest() user: IUser,
+  ): Promise<AddAppointmentResponseDto> {
+    const addAppoimentResponse: IAppointmentAddedResponse =
+      await firstValueFrom(
+        this.appoitmentServiceClient.send('add_appointment', {
+          ...addAppointmentDto,
+          mindBodyAuthorization: user.mindBodyToken,
+        }),
+      );
+
+    if (addAppoimentResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: addAppoimentResponse.message,
+          data: null,
+          errors: addAppoimentResponse.errors,
+        },
+        addAppoimentResponse.status,
+      );
+    }
+
+    return {
+      message: addAppoimentResponse.message,
+      data: addAppoimentResponse.data,
+      errors: null,
+    };
+  }
+
+  @Get('wellness/:appointmentId')
+  async getSingleAppointmentHealth(
+    @Param('appointmentId') appointmentId: number,
+    @GetUserRequest() user: IUser,
+  ): Promise<GetSingleMindBodyhAppointmentReponseDto> {
+    const getSingleMindBodyAppointmentResponse: ISingleMindBodyAppointmentResponse =
+      await firstValueFrom(
+        this.appoitmentServiceClient.send('get_single_mindboy_appointment', {
+          appointmentId,
+          mindBodyAuthorization: user.mindBodyToken,
+        }),
+      );
+
+    if (getSingleMindBodyAppointmentResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getSingleMindBodyAppointmentResponse.message,
+        },
+        getSingleMindBodyAppointmentResponse.status,
+      );
+    }
+
+    return {
+      data: getSingleMindBodyAppointmentResponse.data,
+    };
+  }
+
+  @Put('wellness/:appointmentId')
+  async updateAppointmentWellness(
+    @Param('appointmentId') appointmentId: number,
+    @Body() updateMindBodyAppointmentDto: UpdateMindBodyAppointmentDto,
+    @GetUserRequest() user: IUser,
+  ): Promise<UpdateMindBodyAppointmentResponseDto> {
+    const updateMindBodyAppointmentResponse: IUpdateMindBodyAppointmentResponse =
+      await firstValueFrom(
+        this.appoitmentServiceClient.send('update_mindboy_appointment', {
+          appointmentId,
+          mindBodyAuthorization: user.mindBodyToken,
+          ...updateMindBodyAppointmentDto,
+        }),
+      );
+
+    if (updateMindBodyAppointmentResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: updateMindBodyAppointmentResponse.message,
+        },
+        updateMindBodyAppointmentResponse.status,
+      );
+    }
+
+    return {
+      data: updateMindBodyAppointmentResponse.data,
     };
   }
 }

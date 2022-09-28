@@ -16,6 +16,7 @@ import {
   ChangePasswordResponseDto,
   ForgotPasswordResponseDto,
   LogoutResponseDto,
+  SearchUserEmailDto,
 } from './interfaces';
 
 @Controller('user')
@@ -312,6 +313,47 @@ export class UserController {
 
     try {
       const user = await this.userService.searchUserById(getUserByIdDto.userId);
+
+      if (!user) {
+        return {
+          status: HttpStatus.NOT_FOUND,
+          message: 'User not found',
+          user: null,
+        };
+      }
+
+      return {
+        status: HttpStatus.OK,
+        message: 'User Found',
+        user: user,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        user: null,
+        errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('search_user_by_email')
+  async searchUserByEmail(
+    @Payload() searchUserEmailDto: SearchUserEmailDto,
+  ): Promise<IUserSearchResponse> {
+    if (!searchUserEmailDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Bad request, data missing',
+        user: null,
+      };
+    }
+
+    try {
+      const user = await this.userService.searchUserByEmail(
+        searchUserEmailDto.email,
+      );
 
       if (!user) {
         return {

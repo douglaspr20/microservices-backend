@@ -15,4 +15,7 @@ export interface IUser {
   };
   mindBodyToken?: string;
   mindBodyClientId?: number;
+  cerboPatientId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

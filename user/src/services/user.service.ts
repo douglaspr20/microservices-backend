@@ -83,7 +83,7 @@ export class UserService {
     await this.userRepository.save(newUser);
 
     delete newUser.mindBodyToken;
-    delete newUser.mindbodyClientId;
+    delete newUser.mindBodyClientId;
     delete newUser.cerboPatientId;
 
     return newUser;

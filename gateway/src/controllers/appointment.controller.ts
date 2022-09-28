@@ -56,26 +56,43 @@ export class AppointmentController {
 
   @Get()
   async getAppointments(@GetUserRequest() user: IUser): Promise<any> {
-    const getCerboAppointmentResponse: IGetCerboAppointmentsResponse =
-      await firstValueFrom(
-        this.appoitmentServiceClient.send(
-          'get_cerbo_appointments_range_date',
-          {},
-        ),
-      );
+    const startDate = new Date(user.createdAt);
+    const endDate = new Date();
 
-    const getMindBodyAppointmentResponse: IGetMindBodyAppointmentsResponse =
-      await firstValueFrom(
+    const yearStartDate = startDate.getFullYear();
+    const monthStartDate = startDate.getMonth() + 1;
+    const dateStarDate = startDate.getDate();
+
+    const yearEndDate = endDate.getFullYear();
+    const monthEndDate = endDate.getMonth() + 1;
+    const dateEndDate = endDate.getDate();
+
+    const [getMindBodyAppointmentResponse, getCerboAppointmentResponse]: [
+      IGetMindBodyAppointmentsResponse,
+      IGetCerboAppointmentsResponse,
+    ] = await Promise.all([
+      firstValueFrom(
         this.appoitmentServiceClient.send('get_mindboy_appointments', {
           mindBodyAuthorization: user.mindBodyToken,
           clientId: user.mindBodyClientId,
         }),
-      );
+      ),
+      firstValueFrom(
+        this.appoitmentServiceClient.send('get_cerbo_appointments_range_date', {
+          start_date: `${yearStartDate}-0${monthStartDate}-${dateStarDate}`,
+          end_date: `${yearEndDate}-0${monthEndDate}-${dateEndDate}`,
+          pt_id: user.cerboPatientId,
+        }),
+      ),
+    ]);
 
-    if (getCerboAppointmentResponse.status !== HttpStatus.OK) {
+    if (
+      getCerboAppointmentResponse.status !== HttpStatus.OK &&
+      getMindBodyAppointmentResponse.status !== HttpStatus.OK
+    ) {
       throw new HttpException(
         {
-          message: getCerboAppointmentResponse.message,
+          message: 'Something went wrong',
           data: null,
           errors: getCerboAppointmentResponse.errors,
         },
@@ -83,20 +100,13 @@ export class AppointmentController {
       );
     }
 
-    if (getMindBodyAppointmentResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: getMindBodyAppointmentResponse.message,
-        },
-        getMindBodyAppointmentResponse.status,
-      );
-    }
-
-    getCerboAppointmentResponse.data.appointments;
-
     return {
-      healthAppointments: getCerboAppointmentResponse.data.appointments,
-      wellnessAppointments: getMindBodyAppointmentResponse.data.Appointments,
+      healthAppointments: getCerboAppointmentResponse.data
+        ? getCerboAppointmentResponse.data?.appointments
+        : [],
+      wellnessAppointments: getMindBodyAppointmentResponse.data
+        ? getMindBodyAppointmentResponse.data.Appointments
+        : [],
     };
   }
 

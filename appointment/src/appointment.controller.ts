@@ -37,6 +37,8 @@ export class AppointmentController {
   ) {}
 
   mindbodyUrl = this.configService.get('mindbodyBaseUrl');
+  mindbodyApiKey = this.configService.get('mindbodyApiKey');
+  mindbodySiteId = this.configService.get('mindbodySiteId');
   cerboUrl = this.configService.get('cerboBaseUrl');
   cerboUsername = this.configService.get('cerboUsername');
   cerboSecretKey = this.configService.get('cerboSecretKey');
@@ -45,19 +47,19 @@ export class AppointmentController {
   async getCerboAppointmentsInDateRange(
     @Payload() getCerboAppointmentsDto: GetCerboAppointmentsDto,
   ): Promise<GetCerboAppointmentsResponseDto> {
-    this.httpService.axiosRef.defaults.auth = {
-      username: this.cerboUsername,
-      password: this.cerboSecretKey,
-    };
-
-    this.httpService.axiosRef.defaults.params = {
-      ...getCerboAppointmentsDto,
-    };
-
     try {
       const { data } =
         await this.httpService.axiosRef.get<IGetAppointmentResponseCerbo>(
           `${this.cerboUrl}/appointments`,
+          {
+            auth: {
+              username: this.cerboUsername,
+              password: this.cerboSecretKey,
+            },
+            params: {
+              ...getCerboAppointmentsDto,
+            },
+          },
         );
 
       const { data: appointments, has_more, total_count } = data;
@@ -102,14 +104,16 @@ export class AppointmentController {
     @Payload() getSingleAppointmentDto: GetSingleAppointmentDto,
   ): Promise<GetSingleCerboAppointmentResponseDto> {
     const { appointmentId } = getSingleAppointmentDto;
-    this.httpService.axiosRef.defaults.auth = {
-      username: this.cerboUsername,
-      password: this.cerboSecretKey,
-    };
 
     try {
       const { data } = await this.httpService.axiosRef.get<IAppointmentCerbo>(
         `${this.cerboUrl}/appointments/${appointmentId}`,
+        {
+          auth: {
+            username: this.cerboUsername,
+            password: this.cerboSecretKey,
+          },
+        },
       );
 
       return {
@@ -147,16 +151,17 @@ export class AppointmentController {
   async AddCerboAppointment(
     @Payload() addCerboAppointmentDto: AddCerboAppointmentDto,
   ): Promise<AddAppointmentCerboResponseDto> {
-    this.httpService.axiosRef.defaults.auth = {
-      username: this.cerboUsername,
-      password: this.cerboSecretKey,
-    };
-
     try {
       const { data } = await this.httpService.axiosRef.post<IAppointmentCerbo>(
         `${this.cerboUrl}/appointments`,
         {
           ...addCerboAppointmentDto,
+        },
+        {
+          auth: {
+            username: this.cerboUsername,
+            password: this.cerboSecretKey,
+          },
         },
       );
 
@@ -196,16 +201,18 @@ export class AppointmentController {
     @Payload() updateCerboAppointmentDto: UpdateCerboAppointmentDto,
   ): Promise<UpdateCerboAppointmentResponseDto> {
     const { appointmentId, ...rest } = updateCerboAppointmentDto;
-    this.httpService.axiosRef.defaults.auth = {
-      username: this.cerboUsername,
-      password: this.cerboSecretKey,
-    };
 
     try {
       const { data } = await this.httpService.axiosRef.patch<IAppointmentCerbo>(
         `${this.cerboUrl}/appointments/${appointmentId}`,
         {
           ...rest,
+        },
+        {
+          auth: {
+            username: this.cerboUsername,
+            password: this.cerboSecretKey,
+          },
         },
       );
 
@@ -245,14 +252,16 @@ export class AppointmentController {
     @Payload() deleteCerboAppointmentDto: DeleteCerboAppointmentDto,
   ): Promise<DeleteCerboAppointmentResponseDto> {
     const { appointmentId } = deleteCerboAppointmentDto;
-    this.httpService.axiosRef.defaults.auth = {
-      username: this.cerboUsername,
-      password: this.cerboSecretKey,
-    };
 
     try {
       await this.httpService.axiosRef.delete<IDeleteAppointmentCerboResponse>(
         `${this.cerboUrl}/appointments/${appointmentId}`,
+        {
+          auth: {
+            username: this.cerboUsername,
+            password: this.cerboSecretKey,
+          },
+        },
       );
 
       return {
@@ -287,19 +296,19 @@ export class AppointmentController {
   async getCerboAppointmentsTypes(
     @Payload() getCerboAppointmentsTypesDto: GetCerboAppointmentsTypesDto,
   ): Promise<GetCerboAppointmentsTypesResponseDto> {
-    this.httpService.axiosRef.defaults.auth = {
-      username: this.cerboUsername,
-      password: this.cerboSecretKey,
-    };
-
-    this.httpService.axiosRef.defaults.params = {
-      ...getCerboAppointmentsTypesDto,
-    };
-
     try {
       const { data } =
         await this.httpService.axiosRef.get<IGetAppointmentTypeResponseCerbo>(
           `${this.cerboUrl}/appointment_types`,
+          {
+            auth: {
+              username: this.cerboUsername,
+              password: this.cerboSecretKey,
+            },
+            params: {
+              ...getCerboAppointmentsTypesDto,
+            },
+          },
         );
 
       const { data: appointmentTypes, has_more, total_count } = data;
@@ -359,16 +368,19 @@ export class AppointmentController {
       };
     }
 
-    this.httpService.axiosRef.defaults.params = {
-      ...getMindBodyAppointmentsDto,
-    };
-
-    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      mindBodyAuthorization;
-
     try {
       const response = await this.httpService.axiosRef.get(
         `${this.mindbodyUrl}/appointment/staffappointments`,
+        {
+          headers: {
+            'API-Key': this.mindbodyApiKey,
+            SiteId: this.mindbodySiteId,
+            Authorization: mindBodyAuthorization,
+          },
+          params: {
+            ClientId: clientId,
+          },
+        },
       );
 
       return {
@@ -423,13 +435,17 @@ export class AppointmentController {
       };
     }
 
-    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      mindBodyAuthorization;
-
     try {
       const response = await this.httpService.axiosRef.post(
         `${this.mindbodyUrl}/addappointment`,
         addAppointmentDto,
+        {
+          headers: {
+            'API-Key': this.mindbodyApiKey,
+            SiteId: this.mindbodySiteId,
+            Authorization: mindBodyAuthorization,
+          },
+        },
       );
 
       return {
@@ -487,16 +503,21 @@ export class AppointmentController {
       };
     }
 
-    this.httpService.axiosRef.defaults.params = {
-      appointmentIds: appointmentId,
-    };
-
-    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      mindBodyAuthorization;
+    this.httpService.axiosRef.defaults.params = {};
 
     try {
       const response = await this.httpService.axiosRef.get(
         `${this.mindbodyUrl}/appointment/staffappointments`,
+        {
+          headers: {
+            'API-Key': this.mindbodyApiKey,
+            SiteId: this.mindbodySiteId,
+            Authorization: mindBodyAuthorization,
+          },
+          params: {
+            appointmentIds: appointmentId,
+          },
+        },
       );
 
       return {
@@ -554,15 +575,19 @@ export class AppointmentController {
       };
     }
 
-    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      mindBodyAuthorization;
-
     try {
       const response = await this.httpService.axiosRef.post(
         `${this.mindbodyUrl}/appointment/updateappointment`,
         {
           AppointmentId: appointmentId,
           ...updateMindBodyAppointmentDto,
+        },
+        {
+          headers: {
+            'API-Key': this.mindbodyApiKey,
+            SiteId: this.mindbodySiteId,
+            Authorization: mindBodyAuthorization,
+          },
         },
       );
 

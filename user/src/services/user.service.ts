@@ -69,6 +69,10 @@ export class UserService {
       })
       .promise();
 
+    const newUser = this.userRepository.create(createUserDto);
+
+    await this.userRepository.save(newUser);
+
     return {
       ...userRegister,
     };
@@ -86,7 +90,7 @@ export class UserService {
       .update(email + clientId)
       .digest('base64');
 
-    await cognito
+    const initAuth = await cognito
       .confirmSignUp({
         ClientId: clientId,
         Username: email,
@@ -95,15 +99,28 @@ export class UserService {
       })
       .promise();
 
-    const newUser = this.userRepository.create(createUserDto);
+    return initAuth;
+  }
 
-    await this.userRepository.save(newUser);
+  async resendVerificationCode(email: string) {
+    const { clientId, clientSecret } = this.configService.get('cognito');
 
-    delete newUser.mindBodyToken;
-    delete newUser.mindBodyClientId;
-    delete newUser.cerboPatientId;
+    const cognito = new this.aws.CognitoIdentityServiceProvider();
 
-    return newUser;
+    const hash = crypto
+      .createHmac('sha256', clientSecret)
+      .update(email + clientId)
+      .digest('base64');
+
+    const initAuth = await cognito
+      .resendConfirmationCode({
+        ClientId: clientId,
+        SecretHash: hash,
+        Username: email,
+      })
+      .promise();
+
+    return initAuth;
   }
 
   async login(userInfo: LoginUserDto) {
@@ -193,17 +210,15 @@ export class UserService {
       .promise();
   }
 
-  async refreshToken(payload: { refreshToken: string; email: string }) {
+  async refreshToken(refreshToken: string, sub: string) {
     const { clientId, clientSecret, userPoolId } =
       this.configService.get('cognito');
-
-    const { email } = payload;
 
     const cognito = new this.aws.CognitoIdentityServiceProvider();
 
     const hash = crypto
       .createHmac('sha256', clientSecret)
-      .update(email + clientId)
+      .update(sub + clientId)
       .digest('base64');
 
     const initAuthResponse = await cognito
@@ -212,7 +227,8 @@ export class UserService {
         ClientId: clientId,
         AuthFlow: 'REFRESH_TOKEN',
         AuthParameters: {
-          REFRESH_TOKEN: payload.refreshToken,
+          USERNAME: sub,
+          REFRESH_TOKEN: refreshToken,
           SECRET_HASH: hash,
         },
       })

@@ -20,10 +20,6 @@ export class UpdateCerboAppointmentDto {
   @IsOptional()
   provider_ids: number;
 
-  @IsNumber()
-  @IsOptional()
-  pt_id: number;
-
   @IsString()
   @IsOptional()
   appointment_type: string;

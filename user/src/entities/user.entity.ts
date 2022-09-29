@@ -54,10 +54,14 @@ export class User {
   })
   mindBodyToken: string;
 
-  @Column('text')
+  @Column('text', {
+    nullable: true,
+  })
   mindBodyClientId: string;
 
-  @Column('text')
+  @Column('text', {
+    nullable: true,
+  })
   cerboPatientId: string;
 
   @CreateDateColumn({

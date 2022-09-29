@@ -14,4 +14,5 @@ export * from './get-mindbody-appointments.dto';
 export * from './get-mindbody-appointments-reponse.dto';
 export * from './get-single-mindbody-appointment.dto';
 export * from './update-mindbody-appointmet.dto';
-export * from './update-mindboy-appointment-response.dt';
+export * from './update-mindboy-appointment-response.dto';
+export * from './get-appointment-class-reponse.dto';

@@ -1,24 +1,21 @@
-import { IsBoolean, IsNumber, IsNumberString } from 'class-validator';
+import { IsBoolean, IsNumber } from 'class-validator';
 
 export class AddClientToClassDto {
-  @IsNumberString()
-  ClientId: string;
-
   @IsNumber()
-  ClassId: number;
+  classId: number;
 
   @IsBoolean()
-  Test: boolean;
+  test: boolean;
 
   @IsBoolean()
-  RequirePayment: boolean;
+  requirePayment: boolean;
 
   @IsBoolean()
-  Waitlist: boolean;
+  waitlist: boolean;
 
   @IsBoolean()
-  SendEmail: boolean;
+  sendEmail: boolean;
 
   @IsBoolean()
-  CrossRegionalBooking: boolean;
+  crossRegionalBooking: boolean;
 }

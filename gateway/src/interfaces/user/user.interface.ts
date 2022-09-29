@@ -18,4 +18,5 @@ export interface IUser {
   cerboPatientId?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  sub?: string;
 }

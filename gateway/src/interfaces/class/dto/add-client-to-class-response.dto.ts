@@ -2,7 +2,7 @@ export class AddClientToClassResponseDto {
   message: string;
   data: IVisit | null;
 
-  errors: { [key: string]: any };
+  errors?: { [key: string]: any };
 }
 
 export interface IVisit {

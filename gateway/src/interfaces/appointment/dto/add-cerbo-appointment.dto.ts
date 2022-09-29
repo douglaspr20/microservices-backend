@@ -18,9 +18,6 @@ export class AddCerboAppointmentDto {
   @IsNumber({}, { each: true })
   provider_ids: number;
 
-  @IsNumber()
-  pt_id: number;
-
   @IsString()
   appointment_type: string;
 

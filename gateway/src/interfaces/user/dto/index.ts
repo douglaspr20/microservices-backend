@@ -9,3 +9,5 @@ export * from './forgot-password-response.dto';
 export * from './logout-response.dto';
 export * from './refresh-user-token.dto';
 export * from './login-response.dto';
+export * from './resend-code.dto';
+export * from './confirm-create-user.dto';

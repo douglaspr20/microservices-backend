@@ -39,15 +39,15 @@ export class ClassController {
       };
     }
 
-    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      mindBodyAuthorization;
-
-    this.httpService.axiosRef.defaults.params = {
-      ...getClassesDto,
-    };
-
     try {
-      const response = await this.httpService.axiosRef.get(`/classes`);
+      const response = await this.httpService.axiosRef.get(`/classes`, {
+        headers: {
+          Authorization: mindBodyAuthorization,
+        },
+        params: {
+          ...getClassesDto,
+        },
+      });
 
       return {
         status: HttpStatus.OK,
@@ -170,13 +170,15 @@ export class ClassController {
       };
     }
 
-    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      mindBodyAuthorization;
-
     try {
       const response = await this.httpService.axiosRef.post(
         `/addclienttoclass`,
         addClientToClassDto,
+        {
+          headers: {
+            Authorization: mindBodyAuthorization,
+          },
+        },
       );
 
       return {

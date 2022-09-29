@@ -1,6 +1,6 @@
 import { ClientProxy } from '@nestjs/microservices';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
 import { IUserSearchResponse } from '../interfaces/user';
@@ -39,8 +39,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }),
     );
 
-    if (!payload.email_verified || !payload.sub) return false;
+    if (!payload.email_verified) {
+      throw new UnauthorizedException('You need verify your email for logging');
+    }
 
-    return getUserResponse.user;
+    if (!payload.sub) return false;
+
+    return { ...getUserResponse.user, sub: payload.sub };
   }
 }

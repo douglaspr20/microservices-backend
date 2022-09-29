@@ -18,6 +18,7 @@ import {
   LogoutResponseDto,
   SearchUserEmailDto,
   UpdateUserResponseDto,
+  RefreshTokenDto,
 } from './interfaces';
 
 @Controller('user')
@@ -119,6 +120,40 @@ export class UserController {
       return {
         status: HttpStatus.CREATED,
         message: 'Account successfully verified',
+      };
+    } catch (e) {
+      console.log(e);
+
+      if (e.statusCode && e.statusCode !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: e.statusCode,
+          message: e.message,
+        };
+      }
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+      };
+    }
+  }
+
+  @MessagePattern('user_resend_code')
+  async resendVerificationCode(
+    @Payload() email: string,
+  ): Promise<ConfirmCreateUserResponseDto> {
+    if (!email) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Missing data for for confirm register',
+      };
+    }
+
+    try {
+      await this.userService.resendVerificationCode(email);
+
+      return {
+        status: HttpStatus.OK,
+        message: 'A new verification code has been sent to your email address',
       };
     } catch (e) {
       console.log(e);
@@ -287,17 +322,19 @@ export class UserController {
 
   @MessagePattern('user_refresh_token')
   async userRefreshToken(
-    @Payload() payload: { refreshToken: string; email: string },
+    @Payload() refreshTokenDto: RefreshTokenDto,
   ): Promise<LoginResponseDto> {
-    if (!payload) {
+    if (!refreshTokenDto) {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Bad request',
       };
     }
 
+    const { refreshToken, sub } = refreshTokenDto;
+
     const { IdToken, AccessToken, ExpiresIn, RefreshToken } =
-      await this.userService.refreshToken(payload);
+      await this.userService.refreshToken(refreshToken, sub);
 
     return {
       status: HttpStatus.OK,

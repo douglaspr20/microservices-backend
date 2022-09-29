@@ -9,9 +9,6 @@ export class AddAppointmentDto {
   @IsBoolean()
   ApplyPayment: false;
 
-  @IsNumberString()
-  ClientId: string;
-
   @IsNumber()
   LocationId: number;
 

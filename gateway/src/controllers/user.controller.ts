@@ -30,6 +30,9 @@ import {
   RefreshUserTokenDto,
   ILoginResponse,
   LoginResponseDto,
+  ResendCodeDto,
+  ConfirmCreateUserDto,
+  IUserSearchResponse,
 } from '../interfaces/user';
 import { ICreateMindBodyToken } from '../interfaces/token';
 
@@ -169,7 +172,7 @@ export class UserController {
 
   @Post('register/confirm')
   async confirmRegister(
-    @Body() createUserDto: CreateUserDto,
+    @Body() confirmCreateUserDto: ConfirmCreateUserDto,
   ): Promise<CreateUserResponseDto> {
     const createMindBodyTokenResponse: ICreateMindBodyToken =
       await firstValueFrom(
@@ -193,14 +196,14 @@ export class UserController {
     ] = await Promise.all([
       firstValueFrom(
         this.clientServiceClient.send('get_clients', {
-          searchText: createUserDto.email,
+          searchText: confirmCreateUserDto.email,
           mindbodyauthorization: mindBodyToken,
         }),
       ),
 
       firstValueFrom(
         this.patientServiceClient.send('search_patient', {
-          email: createUserDto.email,
+          email: confirmCreateUserDto.email,
         }),
       ),
     ]);
@@ -209,6 +212,14 @@ export class UserController {
     let cerboPatientId: string;
 
     const requests: any[] = [];
+
+    const userRegister: IUserSearchResponse = await firstValueFrom(
+      this.userServiceClient.send('search_user_by_email', {
+        email: confirmCreateUserDto.email,
+      }),
+    );
+
+    const { user } = userRegister;
 
     if (
       searchExistClientMinBodyReponse.status === HttpStatus.OK &&
@@ -219,12 +230,12 @@ export class UserController {
       requests.push(
         firstValueFrom(
           this.clientServiceClient.send('add_client', {
-            Email: createUserDto.email,
-            FirstName: createUserDto.firstName,
-            LastName: createUserDto.lastName,
-            State: createUserDto.address.state,
-            WorkPhone: createUserDto.mobilePhone,
-            Birthdate: createUserDto.birthdate,
+            Email: user.email,
+            FirstName: user.firstName,
+            LastName: user.lastName,
+            State: user.address.state,
+            WorkPhone: user.mobilePhone,
+            Birthdate: user.birthdate,
             mindbodyauthorization: mindBodyToken,
           }),
         ),
@@ -240,11 +251,11 @@ export class UserController {
       requests.push(
         firstValueFrom(
           this.patientServiceClient.send('add_patient', {
-            first_name: createUserDto.firstName,
-            last_name: createUserDto.lastName,
-            dob: createUserDto.birthdate,
-            sex: createUserDto.gender.substring(0, 1),
-            email1: createUserDto.email,
+            first_name: user.firstName,
+            last_name: user.lastName,
+            dob: user.birthdate,
+            sex: user.gender.substring(0, 1),
+            email1: user.email,
           }),
         ),
       );
@@ -264,8 +275,8 @@ export class UserController {
     });
 
     const userRegisterResponse: IUserCreateResponse = await firstValueFrom(
-      this.userServiceClient.send('user_confirm_register', {
-        ...createUserDto,
+      this.userServiceClient.send('update_user', {
+        ...user,
         mindbodyClientId,
         cerboPatientId,
         mindbodyauthorization: mindBodyToken,
@@ -286,8 +297,30 @@ export class UserController {
     };
   }
 
+  @Post('resendCode')
+  async resendVerificationCode(
+    @Body() resendCodeDto: ResendCodeDto,
+  ): Promise<CreateUserResponseDto> {
+    const resendCodeResponse: IUserCreateResponse = await firstValueFrom(
+      this.userServiceClient.send('user_resend_code', resendCodeDto.email),
+    );
+
+    if (resendCodeResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: resendCodeResponse.message,
+        },
+        resendCodeResponse.status,
+      );
+    }
+
+    return {
+      message: resendCodeResponse.message,
+    };
+  }
+
   @Post('auth')
-  async login(@Body() loginUserDto: LoginUserDto): Promise<any> {
+  async login(@Body() loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
     const createMindBodyTokenResponse: ICreateMindBodyToken =
       await firstValueFrom(
         this.tokenServiceClient.send('create_mind_body_token', {}),
@@ -339,7 +372,6 @@ export class UserController {
       accessToken,
       expiresIn,
       refreshToken,
-      errors: null,
     };
   }
 
@@ -450,11 +482,11 @@ export class UserController {
   async refreshToken(
     @Body() refreshUserTokenDto: RefreshUserTokenDto,
     @GetUserRequest() user: IUser,
-  ): Promise<LoginResponseDto> {
+  ): Promise<LoginResponseDto | any> {
     const refreshTokenReponse: ILoginResponse = await firstValueFrom(
       this.userServiceClient.send('user_refresh_token', {
         refreshToken: refreshUserTokenDto.refreshToken,
-        email: user.email,
+        sub: user.sub,
       }),
     );
 

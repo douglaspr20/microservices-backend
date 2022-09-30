@@ -13,3 +13,4 @@ export * from './logout-response.dto';
 export * from './search-user-email.dto';
 export * from './update-user-response.dto';
 export * from './refresh-token.dto';
+export * from './confirm-create-user.dto';

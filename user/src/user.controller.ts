@@ -19,6 +19,7 @@ import {
   SearchUserEmailDto,
   UpdateUserResponseDto,
   RefreshTokenDto,
+  ConfirmCreateUserDto,
 } from './interfaces';
 
 @Controller('user')
@@ -105,9 +106,9 @@ export class UserController {
 
   @MessagePattern('user_confirm_register')
   async confirmRegister(
-    @Payload() createUserDto: CreateUserDto,
+    @Payload() confirmCreateUserDto: ConfirmCreateUserDto,
   ): Promise<ConfirmCreateUserResponseDto> {
-    if (!createUserDto) {
+    if (!confirmCreateUserDto) {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Missing data for for confirm register',
@@ -115,7 +116,7 @@ export class UserController {
     }
 
     try {
-      await this.userService.confirmRegister(createUserDto);
+      await this.userService.confirmRegister(confirmCreateUserDto);
 
       return {
         status: HttpStatus.CREATED,
@@ -199,7 +200,7 @@ export class UserController {
       if (e.statusCode && e.statusCode !== HttpStatus.INTERNAL_SERVER_ERROR) {
         return {
           status: e.statusCode,
-          message: 'Invalid credentials',
+          message: e.message,
         };
       }
       return {

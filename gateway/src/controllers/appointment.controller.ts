@@ -140,7 +140,6 @@ export class AppointmentController {
     @Query() queryParams: GetCerboAppointmentsDto,
     @GetUserRequest() user: IUser,
   ) {
-    console.log(user);
     const getCerboAppointmentResponse: IGetCerboAppointmentsResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('get_cerbo_appointments_range_date', {

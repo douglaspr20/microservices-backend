@@ -5,6 +5,7 @@ import * as AWS from 'aws-sdk';
 import * as crypto from 'crypto';
 import {
   ChangePasswordDto,
+  ConfirmCreateUserDto,
   ConfirmForgotPasswordDto,
   CreateUserDto,
   LoginUserDto,
@@ -78,8 +79,8 @@ export class UserService {
     };
   }
 
-  async confirmRegister(createUserDto: CreateUserDto) {
-    const { email, verificationCode } = createUserDto;
+  async confirmRegister(confirmCreateUserDto: ConfirmCreateUserDto) {
+    const { email, verificationCode } = confirmCreateUserDto;
 
     const { clientId, clientSecret } = this.configService.get('cognito');
 

@@ -46,6 +46,7 @@ import {
   IAddPatientResponse,
   IGetPatientsResponse,
 } from 'src/interfaces/patient';
+import { RefreshTokenGuard } from '../guards';
 
 @Controller('user')
 export class UserController {
@@ -208,7 +209,7 @@ export class UserController {
       ),
     ]);
 
-    let mindbodyClientId: number;
+    let mindBodyClientId: number;
     let cerboPatientId: string;
 
     const requests: any[] = [];
@@ -225,7 +226,7 @@ export class UserController {
       searchExistClientMinBodyReponse.status === HttpStatus.OK &&
       searchExistClientMinBodyReponse.data.Clients.length > 0
     ) {
-      mindbodyClientId = searchExistClientMinBodyReponse.data.Clients[0].Id;
+      mindBodyClientId = searchExistClientMinBodyReponse.data.Clients[0].Id;
     } else {
       requests.push(
         firstValueFrom(
@@ -266,7 +267,7 @@ export class UserController {
 
     result.forEach((res) => {
       if (res?.data?.Id) {
-        mindbodyClientId = res.data.Id;
+        mindBodyClientId = res.data.Id;
       }
 
       if (res?.data?.id) {
@@ -274,26 +275,34 @@ export class UserController {
       }
     });
 
-    const userRegisterResponse: IUserCreateResponse = await firstValueFrom(
-      this.userServiceClient.send('update_user', {
-        ...user,
-        mindbodyClientId,
-        cerboPatientId,
-        mindbodyauthorization: mindBodyToken,
+    Promise.resolve(
+      firstValueFrom(
+        this.userServiceClient.send('update_user', {
+          ...user,
+          mindBodyClientId,
+          cerboPatientId,
+          mindBodyToken,
+        }),
+      ),
+    );
+
+    const userConfirmResponse: IUserCreateResponse = await firstValueFrom(
+      this.userServiceClient.send('user_confirm_register', {
+        ...confirmCreateUserDto,
       }),
     );
 
-    if (userRegisterResponse.status !== HttpStatus.CREATED) {
+    if (userConfirmResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
-          message: userRegisterResponse.message,
+          message: userConfirmResponse.message,
         },
-        userRegisterResponse.status,
+        userConfirmResponse.status,
       );
     }
 
     return {
-      message: userRegisterResponse.message,
+      message: 'Your registration has been successfully confirmed',
     };
   }
 
@@ -377,10 +386,14 @@ export class UserController {
 
   @Put('auth/changePassword')
   @UseGuards(AuthGuard('jwt'))
-  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
+  async changePassword(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @GetRequestHeaderParam('accesstoken') authorization: string,
+  ) {
     const changePasswordResponse: any = await firstValueFrom(
       this.userServiceClient.send('user_change_password', {
         ...changePasswordDto,
+        authorization,
       }),
     );
     if (changePasswordResponse.status !== HttpStatus.OK) {
@@ -395,10 +408,6 @@ export class UserController {
     }
     return {
       message: 'Password Changed Successfully',
-      data: {
-        ...changePasswordResponse,
-      },
-      errors: null,
     };
   }
 
@@ -478,7 +487,7 @@ export class UserController {
   }
 
   @Post('auth/refreshToken')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(RefreshTokenGuard)
   async refreshToken(
     @Body() refreshUserTokenDto: RefreshUserTokenDto,
     @GetUserRequest() user: IUser,

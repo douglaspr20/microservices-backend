@@ -10,6 +10,7 @@ import {
   SaleController,
   EnrrollmentController,
   PatientController,
+  RecordController,
 } from './controllers';
 import { AppService } from './services/app.service';
 import { LocalStrategy, JwtStrategy } from './strategies';
@@ -29,6 +30,7 @@ import { LocalStrategy, JwtStrategy } from './strategies';
     SaleController,
     EnrrollmentController,
     PatientController,
+    RecordController,
   ],
   providers: [
     ConfigService,

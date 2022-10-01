@@ -9,3 +9,5 @@ export * from './update-patient-response.dto';
 export * from './delete-patient.dto';
 export * from './delete-patient-response.dto';
 export * from './search-patient.dto';
+export * from './get-all-documents.dto';
+export * from './get-patient-data-response.dto';

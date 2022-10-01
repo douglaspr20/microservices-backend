@@ -7,11 +7,17 @@ import {
   AddPatientResponseDto,
   DeletePatientDto,
   DeletePatientResponseDto,
+  GetAllDocumentsDto,
+  GetPatientDataResponseDto,
   GetPatientsDto,
   GetPatientsResponseDto,
   GetSinglePatientDto,
   GetSinglePatientResponseDto,
+  IGetDocumentsPatient,
   IGetPatientsResponseCerbo,
+  IGetRxes,
+  IGetVaccinesPatient,
+  IGetVitalsPatient,
   IPatient,
   SearchPatientDto,
   UpdatePatientDto,
@@ -289,6 +295,218 @@ export class PatientController {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong',
         errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('patient_documents')
+  async getAllDocumentsRecordsPatient(
+    @Payload() getAllDocumentsDto: GetAllDocumentsDto,
+  ): Promise<GetPatientDataResponseDto> {
+    const { patientId } = getAllDocumentsDto;
+    try {
+      const { data } =
+        await this.httpService.axiosRef.get<IGetDocumentsPatient>(
+          `/patients/${patientId}/documents`,
+        );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Document founds',
+        ...data,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      console.log(response);
+
+      const { error, message } = response.data as CerboErrorResponse;
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          message: error ? error.message : message,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+      };
+    }
+  }
+
+  @MessagePattern('patient_rxes')
+  async getAllRxesRecords(
+    @Payload() patientId: string,
+  ): Promise<GetPatientDataResponseDto> {
+    try {
+      const { data } = await this.httpService.axiosRef.get<IGetRxes>(
+        `/patients/${patientId}/rxs`,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Prescriptions founds',
+        ...data,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      console.log(response);
+
+      const { error, message } = response.data as CerboErrorResponse;
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          message: error ? error.message : message,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+      };
+    }
+  }
+
+  @MessagePattern('patient_vaccines')
+  async getAllVaccineRecordsPatient(
+    @Payload() patientId: string,
+  ): Promise<GetPatientDataResponseDto> {
+    try {
+      const { data } = await this.httpService.axiosRef.get<IGetVaccinesPatient>(
+        `/patients/${patientId}/vaccines`,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Vaccines founds',
+        ...data,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      console.log(response);
+
+      const { error, message } = response.data as CerboErrorResponse;
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          message: error ? error.message : message,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+      };
+    }
+  }
+
+  @MessagePattern('patient_vitals_height')
+  async getAllVitalHeightRecordsPatient(
+    @Payload() patientId: string,
+  ): Promise<GetPatientDataResponseDto> {
+    try {
+      const { data } = await this.httpService.axiosRef.get<IGetVitalsPatient>(
+        `/patients/${patientId}/vitals/height`,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Patient Heights',
+        ...data,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      console.log(response);
+
+      const { error, message } = response.data as CerboErrorResponse;
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          message: error ? error.message : message,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+      };
+    }
+  }
+
+  @MessagePattern('patient_vitals_weight')
+  async getAllVitalWeightRecordsPatient(
+    @Payload() patientId: string,
+  ): Promise<GetPatientDataResponseDto> {
+    try {
+      const { data } = await this.httpService.axiosRef.get<IGetVitalsPatient>(
+        `/patients/${patientId}/vitals/weight`,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Patient Weights',
+        ...data,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      console.log(response);
+
+      const { error, message } = response.data as CerboErrorResponse;
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          message: error ? error.message : message,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+      };
+    }
+  }
+
+  @MessagePattern('patient_vitals_bp')
+  async getAllVitalBpRecordsPatient(
+    @Payload() patientId: string,
+  ): Promise<GetPatientDataResponseDto> {
+    try {
+      const { data } = await this.httpService.axiosRef.get<IGetVitalsPatient>(
+        `/patients/${patientId}/vitals/bp`,
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Patient Blood Pressure',
+        ...data,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      console.log(response);
+
+      const { error, message } = response.data as CerboErrorResponse;
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          message: error ? error.message : message,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
       };
     }
   }

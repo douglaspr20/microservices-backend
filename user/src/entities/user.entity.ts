@@ -64,6 +64,11 @@ export class User {
   })
   cerboPatientId: string;
 
+  @Column('text', {
+    nullable: true,
+  })
+  refreshToken: string;
+
   @CreateDateColumn({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',

@@ -228,7 +228,6 @@ export class UserService {
         ClientId: clientId,
         AuthFlow: 'REFRESH_TOKEN',
         AuthParameters: {
-          USERNAME: sub,
           REFRESH_TOKEN: refreshToken,
           SECRET_HASH: hash,
         },

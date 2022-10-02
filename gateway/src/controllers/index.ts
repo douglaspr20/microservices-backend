@@ -5,3 +5,4 @@ export * from './sale.controller';
 export * from './user.controller';
 export * from './enrrollment.controller';
 export * from './patient.controller';
+export * from './record.controller';

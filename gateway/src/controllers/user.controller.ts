@@ -8,6 +8,7 @@ import {
   UseGuards,
   Get,
   Put,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { AuthGuard } from '@nestjs/passport';
@@ -46,7 +47,6 @@ import {
   IAddPatientResponse,
   IGetPatientsResponse,
 } from 'src/interfaces/patient';
-import { RefreshTokenGuard } from '../guards';
 
 @Controller('user')
 export class UserController {
@@ -371,6 +371,7 @@ export class UserController {
         this.userServiceClient.send('update_user', {
           id: userDb.id,
           mindBodyToken: mindBodyToken,
+          refreshToken,
         }),
       ),
     );
@@ -487,15 +488,28 @@ export class UserController {
   }
 
   @Post('auth/refreshToken')
-  @UseGuards(RefreshTokenGuard)
   async refreshToken(
     @Body() refreshUserTokenDto: RefreshUserTokenDto,
-    @GetUserRequest() user: IUser,
+    @GetRequestHeaderParam('authorization') authorization: string,
   ): Promise<LoginResponseDto | any> {
+    if (!refreshUserTokenDto) {
+      throw new UnauthorizedException();
+    }
+
+    const { userInfo } = await firstValueFrom(
+      this.tokenServiceClient.send('decode_token', {
+        token: authorization.replace('Bearer ', ''),
+      }),
+    );
+
+    if (!userInfo || !userInfo.sub || !userInfo.email_verified) {
+      throw new UnauthorizedException('Invalid Token');
+    }
+
     const refreshTokenReponse: ILoginResponse = await firstValueFrom(
       this.userServiceClient.send('user_refresh_token', {
         refreshToken: refreshUserTokenDto.refreshToken,
-        sub: user.sub,
+        sub: userInfo.sub,
       }),
     );
 

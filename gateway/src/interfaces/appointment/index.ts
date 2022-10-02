@@ -11,4 +11,5 @@ export * from './getCerboAppointmentTypes.interface';
 export * from './getMindBodyAppointment.interface';
 export * from './getSingleMindBodyAppointment.interface';
 export * from './updateMindBodyAppointment.interface';
+export * from './appointmentCerboResponse.interface';
 export * from './dto';

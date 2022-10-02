@@ -4,7 +4,7 @@ import { IAppointmentMindBody } from '../appointmentMindBody.interface';
 export class GetMindBodyAppointmentsResponseDto {
   message: string;
   data?: {
-    healthAppointments: IAppointmentMindBody[];
+    wellnessAppointments: IAppointmentMindBody[];
     paginationResponse: PaginationResponse;
   } | null;
 }

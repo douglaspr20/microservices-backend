@@ -109,8 +109,19 @@ export class TokenController {
     }
   }
 
-  @MessagePattern('validate_token')
+  @MessagePattern('decode_token')
   async decodeToken(@Payload() decodeTokenDto: DecodeTokenDto): Promise<any> {
+    const userInfo = await this.tokenService.decodeToken(decodeTokenDto.token);
+
+    return {
+      status: HttpStatus.OK,
+      message: 'Token decode',
+      userInfo,
+    };
+  }
+
+  @MessagePattern('validate_token')
+  async validateToken(@Payload() decodeTokenDto: DecodeTokenDto): Promise<any> {
     const tokenData = await this.tokenService.validateToken(
       decodeTokenDto.token,
     );

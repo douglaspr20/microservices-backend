@@ -115,4 +115,8 @@ export class TokenService {
       return error;
     }
   }
+
+  async decodeToken(token: string) {
+    return jsonwebtoken.decode(token);
+  }
 }

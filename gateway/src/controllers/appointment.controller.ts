@@ -43,6 +43,8 @@ import {
   UpdateMindBodyAppointmentResponseDto,
   getAppointmentClassResponseDto,
   IAppointCerboResponse,
+  ICerboProviderResponse,
+  IGetCerboProviderResponse,
 } from '../interfaces/appointment';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -55,7 +57,7 @@ import {
 import {
   formatHealthAppointment,
   formatHealthAppointmentArray,
-} from 'src/utils';
+} from '../utils';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('appointment')
@@ -196,9 +198,42 @@ export class AppointmentController {
     }
 
     return {
-      message: getCerboAppointmentTypeResponse.message,
-      data: getCerboAppointmentTypeResponse.data,
-      errors: null,
+      appointmentTypes:
+        getCerboAppointmentTypeResponse.data.appointmentTypes.map((type) => ({
+          id: type.id,
+          name: type.name,
+          description: type.description,
+          providers: type.which_providers,
+          telemedicine: type.telemedicine,
+        })),
+    };
+  }
+
+  @Get('health/provider/:providerId')
+  async getAppointmentHealthProvider(
+    @Param('providerId') providerId: number,
+  ): Promise<ICerboProviderResponse> {
+    const getSingleAppointmetHealthProvider: IGetCerboProviderResponse =
+      await firstValueFrom(
+        this.appoitmentServiceClient.send('get_cerbo_provider', providerId),
+      );
+
+    if (getSingleAppointmetHealthProvider.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getSingleAppointmetHealthProvider.message,
+          data: null,
+        },
+        getSingleAppointmetHealthProvider.status,
+      );
+    }
+
+    return {
+      id: getSingleAppointmetHealthProvider.data.id,
+      firstName: getSingleAppointmetHealthProvider.data.first_name,
+      middleName: getSingleAppointmetHealthProvider.data.middle_name,
+      lastName: getSingleAppointmetHealthProvider.data.last_name,
+      active: getSingleAppointmetHealthProvider.data.active,
     };
   }
 

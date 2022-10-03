@@ -9,30 +9,33 @@ import {
 import { validStatus } from '../appointmentCerbo.interface';
 
 export class AddCerboAppointmentDto {
-  @IsDateString()
-  start_date_time: string;
-
-  @IsDateString()
-  end_date_time: string;
-
-  @IsNumber({}, { each: true })
-  provider_ids: number;
-
-  @IsString()
-  appointment_type: string;
-
   @IsString()
   title: string;
 
   @IsString()
-  appointment_note: string;
-
-  @IsString()
   @IsEnum(validStatus)
   @IsOptional()
-  status?: string;
+  appointmentStatus: string;
+
+  @IsNumber({}, { each: true })
+  providers: number;
 
   @IsBoolean()
   @IsOptional()
-  telemedicine?: boolean;
+  telemedicine?: {
+    isTelemedicine: false;
+    telemedicineUrl: string;
+  };
+
+  @IsDateString()
+  startDateTime: string;
+
+  @IsDateString()
+  endDateTime: string;
+
+  @IsString()
+  appointmentType: string;
+
+  @IsString()
+  appointmentNote: string;
 }

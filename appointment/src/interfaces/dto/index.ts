@@ -17,3 +17,4 @@ export * from './get-single-appointment-mindbody-reponse.dto';
 export * from './get-mindbody-appointments-response.dto';
 export * from './update-mindbody-appointmet.dto';
 export * from './update-mindbody-appointment-response.dto';
+export * from './get-cerbo-provider-response.dto';

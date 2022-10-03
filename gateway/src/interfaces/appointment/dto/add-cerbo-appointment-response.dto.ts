@@ -1,7 +1,6 @@
-import { IAppointmentCerbo } from '../appointmentCerbo.interface';
+import { IAppointCerboResponse } from '../appointmentCerboResponse.interface';
 
 export class AddAppointmentCerboResponseDto {
   message: string;
-  data: IAppointmentCerbo | null;
-  errors: { [key: string]: any };
+  data: IAppointCerboResponse | null;
 }

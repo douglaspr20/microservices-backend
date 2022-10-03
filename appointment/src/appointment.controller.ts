@@ -25,6 +25,8 @@ import {
   GetMindBodyAppointmentsResponseDto,
   UpdateMindBodyAppointmentDto,
   UpdateMindBodyAppointmentResponseDto,
+  ICerboProvider,
+  GetCerboProviderResponseDto,
 } from './interfaces';
 import { CerboErrorResponse, MindBodyErrorResponse } from './types';
 import { ConfigService } from './services/config.service';
@@ -344,6 +346,54 @@ export class AppointmentController {
         message: 'Something went wrong',
         data: null,
         errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('get_cerbo_provider')
+  async getCerboAppointmentProvider(
+    @Payload() providerId: number,
+  ): Promise<GetCerboProviderResponseDto> {
+    if (!providerId) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Missing or bad data for request',
+      };
+    }
+
+    try {
+      const { data } = await this.httpService.axiosRef.get<ICerboProvider>(
+        `${this.cerboUrl}/users/${providerId}`,
+        {
+          auth: {
+            username: this.cerboUsername,
+            password: this.cerboSecretKey,
+          },
+        },
+      );
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Appointment types founds',
+        data,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      console.log(response);
+
+      const { error, message } = response.data as CerboErrorResponse;
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          message: error ? error.message : message,
+        };
+      }
+
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
       };
     }
   }

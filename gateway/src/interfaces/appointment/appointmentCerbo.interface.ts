@@ -39,7 +39,7 @@ export interface AssociatedProvider {
 
 export interface Telemedicine {
   is_telemedicine: boolean;
-  telemedicine_url: null;
+  telemedicine_url: null | string;
 }
 
 export type ValidStatus =

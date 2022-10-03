@@ -21,7 +21,6 @@ import {
   AddAppointmentDto,
   AddAppointmentResponseDto,
   AddCerboAppointmentDto,
-  GetSingleCerboAppointmentResponseDto,
   IAddedCerboAppointment,
   IAppointmentAddedResponse,
   IGetCerboAppointmentsResponse,
@@ -29,7 +28,6 @@ import {
   ISingleCerboAppointmentResponse,
   UpdateCerboAppointmentDto,
   IUpdateCerboAppointmentResponse,
-  UpdateCerboAppointmentResponseDto,
   IDeleteCerboAppointmentResponse,
   DeleteCerboAppointmentResponseDto,
   GetCerboAppointmentsTypesDto,
@@ -44,6 +42,9 @@ import {
   IUpdateMindBodyAppointmentResponse,
   UpdateMindBodyAppointmentResponseDto,
   getAppointmentClassResponseDto,
+  IAppointCerboResponse,
+  ICerboProviderResponse,
+  IGetCerboProviderResponse,
 } from '../interfaces/appointment';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -53,6 +54,10 @@ import {
   IClass,
   IGetClassesResponse,
 } from '../interfaces/class';
+import {
+  formatHealthAppointment,
+  formatHealthAppointmentArray,
+} from '../utils';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('appointment')
@@ -124,7 +129,9 @@ export class AppointmentController {
 
     return {
       healthAppointments: getCerboAppointmentResponse.data
-        ? getCerboAppointmentResponse.data?.appointments
+        ? formatHealthAppointmentArray(
+            getCerboAppointmentResponse.data?.appointments,
+          )
         : [],
       wellnessAppointments: getMindBodyAppointmentResponse.data
         ? getMindBodyAppointmentResponse.data.Appointments
@@ -161,7 +168,9 @@ export class AppointmentController {
 
     return {
       message: getCerboAppointmentResponse.message,
-      data: getCerboAppointmentResponse.data,
+      healthAppointments: formatHealthAppointmentArray(
+        getCerboAppointmentResponse.data.appointments,
+      ),
       errors: null,
     };
   }
@@ -189,16 +198,49 @@ export class AppointmentController {
     }
 
     return {
-      message: getCerboAppointmentTypeResponse.message,
-      data: getCerboAppointmentTypeResponse.data,
-      errors: null,
+      appointmentTypes:
+        getCerboAppointmentTypeResponse.data.appointmentTypes.map((type) => ({
+          id: type.id,
+          name: type.name,
+          description: type.description,
+          providers: type.which_providers,
+          telemedicine: type.telemedicine,
+        })),
+    };
+  }
+
+  @Get('health/provider/:providerId')
+  async getAppointmentHealthProvider(
+    @Param('providerId') providerId: number,
+  ): Promise<ICerboProviderResponse> {
+    const getSingleAppointmetHealthProvider: IGetCerboProviderResponse =
+      await firstValueFrom(
+        this.appoitmentServiceClient.send('get_cerbo_provider', providerId),
+      );
+
+    if (getSingleAppointmetHealthProvider.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getSingleAppointmetHealthProvider.message,
+          data: null,
+        },
+        getSingleAppointmetHealthProvider.status,
+      );
+    }
+
+    return {
+      id: getSingleAppointmetHealthProvider.data.id,
+      firstName: getSingleAppointmetHealthProvider.data.first_name,
+      middleName: getSingleAppointmetHealthProvider.data.middle_name,
+      lastName: getSingleAppointmetHealthProvider.data.last_name,
+      active: getSingleAppointmetHealthProvider.data.active,
     };
   }
 
   @Get('health/:appointmentId')
   async getSingleAppointmentHealth(
     @Param('appointmentId') appointmentId: number,
-  ): Promise<GetSingleCerboAppointmentResponseDto> {
+  ): Promise<IAppointCerboResponse> {
     const getSingleCerboAppointmentResponse: ISingleCerboAppointmentResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('get_cerbo_single_appointment', {
@@ -215,11 +257,7 @@ export class AppointmentController {
         getSingleCerboAppointmentResponse.status,
       );
     }
-    return {
-      message: getSingleCerboAppointmentResponse.message,
-      data: getSingleCerboAppointmentResponse.data,
-      errors: null,
-    };
+    return formatHealthAppointment(getSingleCerboAppointmentResponse.data);
   }
 
   @Post('health')
@@ -230,7 +268,14 @@ export class AppointmentController {
     const addedAppoimentCerboResponse: IAddedCerboAppointment =
       await firstValueFrom(
         this.appoitmentServiceClient.send('add_cerbo_appointment', {
-          ...addCerboAppointmentDto,
+          title: addCerboAppointmentDto.title,
+          status: addCerboAppointmentDto.appointmentStatus,
+          provider_ids: addCerboAppointmentDto.providers,
+          telemedicine: addCerboAppointmentDto.telemedicine,
+          start_date_time: addCerboAppointmentDto.startDateTime,
+          end_date_time: addCerboAppointmentDto.endDateTime,
+          appointment_type: addCerboAppointmentDto.appointmentType,
+          appointment_note: addCerboAppointmentDto.appointmentNote,
           pt_id: user.cerboPatientId,
         }),
       );
@@ -240,7 +285,6 @@ export class AppointmentController {
         {
           message: addedAppoimentCerboResponse.message,
           data: null,
-          errors: addedAppoimentCerboResponse.errors,
         },
         addedAppoimentCerboResponse.status,
       );
@@ -248,8 +292,7 @@ export class AppointmentController {
 
     return {
       message: addedAppoimentCerboResponse.message,
-      data: addedAppoimentCerboResponse.data,
-      errors: null,
+      data: formatHealthAppointment(addedAppoimentCerboResponse.data),
     };
   }
 
@@ -257,7 +300,7 @@ export class AppointmentController {
   async updateAppointmentHealth(
     @Param('appointmentId') appointmentId: number,
     @Body() updateCerboAppointmentDto: UpdateCerboAppointmentDto,
-  ): Promise<UpdateCerboAppointmentResponseDto> {
+  ): Promise<IAppointCerboResponse> {
     const updateAppoimentCerboResponse: IUpdateCerboAppointmentResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('update_cerbo_appointment', {
@@ -277,11 +320,7 @@ export class AppointmentController {
       );
     }
 
-    return {
-      message: updateAppoimentCerboResponse.message,
-      data: updateAppoimentCerboResponse.data,
-      errors: null,
-    };
+    return formatHealthAppointment(updateAppoimentCerboResponse.data);
   }
 
   @Delete('health/:appointmentId')
@@ -337,7 +376,7 @@ export class AppointmentController {
     return {
       message: getMindBodyAppointmentResponse.message,
       data: {
-        healthAppointments: getMindBodyAppointmentResponse.data.Appointments,
+        wellnessAppointments: getMindBodyAppointmentResponse.data.Appointments,
         paginationResponse:
           getMindBodyAppointmentResponse.data.PaginationResponse,
       },

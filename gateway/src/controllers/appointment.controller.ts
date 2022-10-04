@@ -17,9 +17,7 @@ import { firstValueFrom } from 'rxjs';
 import { GetUserRequest } from '../decorators';
 import { IUser } from '../interfaces/user';
 import {
-  AddAppointmentCerboResponseDto,
   AddAppointmentDto,
-  AddAppointmentResponseDto,
   AddCerboAppointmentDto,
   IAddedCerboAppointment,
   IAppointmentAddedResponse,
@@ -45,6 +43,7 @@ import {
   IAppointCerboResponse,
   ICerboProviderResponse,
   IGetCerboProviderResponse,
+  IAppointmentMindBody,
 } from '../interfaces/appointment';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -159,19 +158,15 @@ export class AppointmentController {
       throw new HttpException(
         {
           message: getCerboAppointmentResponse.message,
-          data: null,
-          errors: getCerboAppointmentResponse.errors,
         },
         getCerboAppointmentResponse.status,
       );
     }
 
     return {
-      message: getCerboAppointmentResponse.message,
       healthAppointments: formatHealthAppointmentArray(
         getCerboAppointmentResponse.data.appointments,
       ),
-      errors: null,
     };
   }
 
@@ -221,10 +216,14 @@ export class AppointmentController {
     if (getSingleAppointmetHealthProvider.status !== HttpStatus.OK) {
       throw new HttpException(
         {
-          message: getSingleAppointmetHealthProvider.message,
-          data: null,
+          message:
+            getSingleAppointmetHealthProvider.message === 'Invalid user ID'
+              ? 'Provider Not Found'
+              : getSingleAppointmetHealthProvider.message,
         },
-        getSingleAppointmetHealthProvider.status,
+        getSingleAppointmetHealthProvider.message === 'Invalid user ID'
+          ? 404
+          : getSingleAppointmetHealthProvider.status,
       );
     }
 
@@ -250,11 +249,15 @@ export class AppointmentController {
     if (getSingleCerboAppointmentResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
-          message: getSingleCerboAppointmentResponse.message,
-          data: null,
-          errors: getSingleCerboAppointmentResponse.errors,
+          message:
+            getSingleCerboAppointmentResponse.message ===
+            'Invalid appointment ID'
+              ? 'Appointment not found'
+              : getSingleCerboAppointmentResponse.message,
         },
-        getSingleCerboAppointmentResponse.status,
+        getSingleCerboAppointmentResponse.message === 'Invalid appointment ID'
+          ? 404
+          : getSingleCerboAppointmentResponse.status,
       );
     }
     return formatHealthAppointment(getSingleCerboAppointmentResponse.data);
@@ -264,19 +267,19 @@ export class AppointmentController {
   async addAppointmentHealth(
     @Body() addCerboAppointmentDto: AddCerboAppointmentDto,
     @GetUserRequest() user: IUser,
-  ): Promise<AddAppointmentCerboResponseDto> {
+  ): Promise<IAppointCerboResponse> {
     const addedAppoimentCerboResponse: IAddedCerboAppointment =
       await firstValueFrom(
         this.appoitmentServiceClient.send('add_cerbo_appointment', {
           title: addCerboAppointmentDto.title,
           status: addCerboAppointmentDto.appointmentStatus,
           provider_ids: addCerboAppointmentDto.providers,
-          telemedicine: addCerboAppointmentDto.telemedicine,
+          // telemedicine: addCerboAppointmentDto.telemedicine.isTelemedicine,
           start_date_time: addCerboAppointmentDto.startDateTime,
           end_date_time: addCerboAppointmentDto.endDateTime,
           appointment_type: addCerboAppointmentDto.appointmentType,
           appointment_note: addCerboAppointmentDto.appointmentNote,
-          pt_id: user.cerboPatientId,
+          pt_id: Number(user.cerboPatientId),
         }),
       );
 
@@ -290,10 +293,7 @@ export class AppointmentController {
       );
     }
 
-    return {
-      message: addedAppoimentCerboResponse.message,
-      data: formatHealthAppointment(addedAppoimentCerboResponse.data),
-    };
+    return formatHealthAppointment(addedAppoimentCerboResponse.data);
   }
 
   @Put('health/:appointmentId')
@@ -304,7 +304,14 @@ export class AppointmentController {
     const updateAppoimentCerboResponse: IUpdateCerboAppointmentResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('update_cerbo_appointment', {
-          ...updateCerboAppointmentDto,
+          title: updateCerboAppointmentDto.title,
+          status: updateCerboAppointmentDto.appointmentStatus,
+          provider_ids: updateCerboAppointmentDto.providers,
+          // telemedicine: updateCerboAppointmentDto.telemedicine.isTelemedicine,
+          start_date_time: updateCerboAppointmentDto.startDateTime,
+          end_date_time: updateCerboAppointmentDto.endDateTime,
+          appointment_type: updateCerboAppointmentDto.appointmentType,
+          appointment_note: updateCerboAppointmentDto.appointmentNote,
           appointmentId,
         }),
       );
@@ -312,11 +319,16 @@ export class AppointmentController {
     if (updateAppoimentCerboResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
-          message: updateAppoimentCerboResponse.message,
-          data: null,
-          errors: updateAppoimentCerboResponse.errors,
+          message:
+            updateAppoimentCerboResponse.message ===
+            'Invalid appointment ID - cannot make edits to an appointment that does not exist'
+              ? 'Appointment not found'
+              : updateAppoimentCerboResponse.message,
         },
-        updateAppoimentCerboResponse.status,
+        updateAppoimentCerboResponse.message ===
+        'Invalid appointment ID - cannot make edits to an appointment that does not exist'
+          ? 404
+          : updateAppoimentCerboResponse.status,
       );
     }
 
@@ -374,12 +386,7 @@ export class AppointmentController {
     }
 
     return {
-      message: getMindBodyAppointmentResponse.message,
-      data: {
-        wellnessAppointments: getMindBodyAppointmentResponse.data.Appointments,
-        paginationResponse:
-          getMindBodyAppointmentResponse.data.PaginationResponse,
-      },
+      wellnessAppointments: getMindBodyAppointmentResponse.data.Appointments,
     };
   }
 
@@ -387,7 +394,7 @@ export class AppointmentController {
   async addAppointmentWellness(
     @Body() addAppointmentDto: AddAppointmentDto,
     @GetUserRequest() user: IUser,
-  ): Promise<AddAppointmentResponseDto> {
+  ): Promise<IAppointmentMindBody> {
     const addAppoimentResponse: IAppointmentAddedResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('add_appointment', {
@@ -409,9 +416,7 @@ export class AppointmentController {
     }
 
     return {
-      message: addAppoimentResponse.message,
-      data: addAppoimentResponse.data,
-      errors: null,
+      ...addAppoimentResponse.data,
     };
   }
 
@@ -460,9 +465,15 @@ export class AppointmentController {
     if (updateMindBodyAppointmentResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
-          message: updateMindBodyAppointmentResponse.message,
+          message: updateMindBodyAppointmentResponse.message.includes(
+            'not found',
+          )
+            ? 'Appointment not found'
+            : updateMindBodyAppointmentResponse.message,
         },
-        updateMindBodyAppointmentResponse.status,
+        updateMindBodyAppointmentResponse.message.includes('not found')
+          ? 404
+          : updateMindBodyAppointmentResponse.status,
       );
     }
 
@@ -510,7 +521,12 @@ export class AppointmentController {
     const addClientToClassResponse: IAddClientToClassResponse =
       await firstValueFrom(
         this.classServiceClient.send('add_client_to_class', {
-          ...addClientToClassDto,
+          ClassId: addClientToClassDto.classId,
+          Test: addClientToClassDto.test,
+          RequirePayment: addClientToClassDto.requirePayment,
+          Waitlist: addClientToClassDto.waitlist,
+          SendEmail: addClientToClassDto.sendEmail,
+          CrossRegionalBooking: addClientToClassDto.crossRegionalBooking,
           clientId: user.mindBodyClientId,
           mindBodyAuthorization: user.mindBodyToken,
         }),
@@ -545,6 +561,15 @@ export class AppointmentController {
         classIds: classId,
       }),
     );
+
+    if (getClassReponse.data.Classes.length === 0) {
+      throw new HttpException(
+        {
+          message: 'Appointment class not found',
+        },
+        404,
+      );
+    }
 
     if (getClassReponse.status !== HttpStatus.OK) {
       throw new HttpException(

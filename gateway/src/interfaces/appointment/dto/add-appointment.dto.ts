@@ -1,9 +1,4 @@
-import {
-  IsBoolean,
-  IsDateString,
-  IsNumber,
-  IsNumberString,
-} from 'class-validator';
+import { IsBoolean, IsDateString, IsNumber } from 'class-validator';
 
 export class AddAppointmentDto {
   @IsBoolean()

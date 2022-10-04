@@ -1,8 +1,8 @@
 import {
-  IsBoolean,
   IsDateString,
   IsEnum,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -20,7 +20,7 @@ export class AddCerboAppointmentDto {
   @IsNumber({}, { each: true })
   providers: number;
 
-  @IsBoolean()
+  @IsObject()
   @IsOptional()
   telemedicine?: {
     isTelemedicine: false;

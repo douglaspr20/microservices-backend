@@ -334,17 +334,32 @@ export class UserController {
 
     const { refreshToken, sub } = refreshTokenDto;
 
-    const { IdToken, AccessToken, ExpiresIn, RefreshToken } =
-      await this.userService.refreshToken(refreshToken, sub);
+    try {
+      const { IdToken, AccessToken, ExpiresIn, RefreshToken } =
+        await this.userService.refreshToken(refreshToken, sub);
 
-    return {
-      status: HttpStatus.OK,
-      message: 'successful token refresh',
-      idToken: IdToken,
-      accessToken: AccessToken,
-      expiresIn: ExpiresIn,
-      refreshToken: RefreshToken,
-    };
+      return {
+        status: HttpStatus.OK,
+        message: 'successful token refresh',
+        idToken: IdToken,
+        accessToken: AccessToken,
+        expiresIn: ExpiresIn,
+        refreshToken: RefreshToken,
+      };
+    } catch (e) {
+      console.log(e);
+
+      if (e.statusCode && e.statusCode !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: e.statusCode,
+          message: e.message,
+        };
+      }
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+      };
+    }
   }
 
   @MessagePattern('logout')

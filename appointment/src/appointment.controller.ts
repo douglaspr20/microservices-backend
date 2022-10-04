@@ -570,6 +570,13 @@ export class AppointmentController {
         },
       );
 
+      if (response.data.Appointments.length === 0) {
+        return {
+          status: HttpStatus.NOT_FOUND,
+          message: 'Appointment not found',
+        };
+      }
+
       return {
         status: HttpStatus.OK,
         message: 'Appointment found',

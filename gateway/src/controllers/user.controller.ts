@@ -9,6 +9,7 @@ import {
   Get,
   Put,
   UnauthorizedException,
+  HttpCode,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { AuthGuard } from '@nestjs/passport';
@@ -308,6 +309,7 @@ export class UserController {
   }
 
   @Post('resendCode')
+  @HttpCode(HttpStatus.OK)
   async resendVerificationCode(
     @Body() resendCodeDto: ResendCodeDto,
   ): Promise<CreateUserResponseDto> {
@@ -330,6 +332,7 @@ export class UserController {
   }
 
   @Post('auth')
+  @HttpCode(HttpStatus.OK)
   async login(@Body() loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
     const createMindBodyTokenResponse: ICreateMindBodyToken =
       await firstValueFrom(
@@ -358,9 +361,10 @@ export class UserController {
       throw new HttpException(
         {
           message: userLoginResponse.message,
-          data: null,
         },
-        userLoginResponse.status,
+        userLoginResponse.message === 'Incorrect username or password.'
+          ? 401
+          : userLoginResponse.status,
       );
     }
 
@@ -387,6 +391,7 @@ export class UserController {
   }
 
   @Put('auth/changePassword')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard('jwt'))
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
@@ -402,18 +407,19 @@ export class UserController {
       throw new HttpException(
         {
           message: changePasswordResponse.message,
-          data: null,
-          errors: changePasswordResponse.errors,
         },
-        changePasswordResponse.status,
+        changePasswordResponse.message === 'Access Token has expired'
+          ? 401
+          : changePasswordResponse.status,
       );
     }
     return {
-      message: 'Password Changed Successfully',
+      message: 'Password was successfully updated',
     };
   }
 
   @Post('auth/forgotPassword')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async forgotPasswordSendCode(
     @Body() forgotPasswordDto: ForgotPasswordDto,
   ): Promise<ForgotPasswordResponseDto> {
@@ -440,6 +446,7 @@ export class UserController {
   }
 
   @Put('auth/forgotPassword')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async forgotPasswordRecovery(
     @Body() confirmForgotPasswordDto: ConfirmForgotPasswordDto,
   ): Promise<ForgotPasswordResponseDto> {
@@ -461,11 +468,12 @@ export class UserController {
     }
 
     return {
-      message: confirmForgotPasswordResponse.message,
+      message: 'Password was successfully updated',
     };
   }
 
   @Post('auth/logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard('jwt'))
   async logoutUser(
     @GetRequestHeaderParam('accesstoken') accesstoken: string,
@@ -489,12 +497,17 @@ export class UserController {
   }
 
   @Post('auth/refreshToken')
+  @HttpCode(HttpStatus.OK)
   async refreshToken(
     @Body() refreshUserTokenDto: RefreshUserTokenDto,
     @GetRequestHeaderParam('authorization') authorization: string,
   ): Promise<LoginResponseDto | any> {
     if (!refreshUserTokenDto) {
       throw new UnauthorizedException();
+    }
+
+    if (!authorization) {
+      throw new UnauthorizedException('Invalid refresh Token');
     }
 
     const { userInfo } = await firstValueFrom(
@@ -504,7 +517,7 @@ export class UserController {
     );
 
     if (!userInfo || !userInfo.sub || !userInfo.email_verified) {
-      throw new UnauthorizedException('Invalid Token');
+      throw new UnauthorizedException('Invalid refresh Token');
     }
 
     const refreshTokenReponse: ILoginResponse = await firstValueFrom(
@@ -519,7 +532,9 @@ export class UserController {
         {
           message: refreshTokenReponse.message,
         },
-        refreshTokenReponse.status,
+        refreshTokenReponse.message === 'Invalid Refresh Token'
+          ? 401
+          : refreshTokenReponse.status,
       );
     }
 

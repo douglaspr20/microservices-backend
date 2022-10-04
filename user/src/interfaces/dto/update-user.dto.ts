@@ -60,5 +60,6 @@ export class UpdateUserDto {
   mindBodyClientId: string;
 
   @IsString()
+  @IsOptional()
   cerboPatientId?: string;
 }

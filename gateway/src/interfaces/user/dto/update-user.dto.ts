@@ -2,7 +2,6 @@ import {
   IsString,
   IsEmail,
   MinLength,
-  IsNumber,
   IsOptional,
   IsObject,
 } from 'class-validator';
@@ -32,12 +31,13 @@ export class UpdateUserDto {
   birthdate: string;
 
   @IsString()
+  @IsOptional()
   @MinLength(6, {
     message: 'the mobile phone must have a minimum length of 6 digits.',
   })
-  mobilePhone: number;
+  mobilePhone: string;
 
-  @IsObject()
+  @IsObject({})
   @IsOptional()
   address: {
     streetAddress: string;
@@ -46,12 +46,4 @@ export class UpdateUserDto {
     zipCode: string;
     country: string;
   };
-
-  @IsString()
-  @IsOptional()
-  mindBodyToken: string;
-
-  @IsNumber()
-  @IsOptional()
-  mindBodyClientId: number;
 }

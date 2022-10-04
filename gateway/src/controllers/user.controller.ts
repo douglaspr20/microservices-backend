@@ -94,6 +94,7 @@ export class UserController {
           Birthdate: updateUserDto.birthdate,
           mindBodyAuthorization: mindBodyToken,
           clientId: mindBodyClientId,
+          CrossRegionalUpdate: false,
         }),
       ),
       firstValueFrom(
@@ -126,9 +127,9 @@ export class UserController {
     }
 
     const updateUserReponse: IUpdateUserResponse = await firstValueFrom(
-      this.userServiceClient.send('user_update', {
+      this.userServiceClient.send('update_user', {
         ...updateUserDto,
-        userId: user.id,
+        id: user.id,
       }),
     );
 
@@ -175,6 +176,21 @@ export class UserController {
   async confirmRegister(
     @Body() confirmCreateUserDto: ConfirmCreateUserDto,
   ): Promise<CreateUserResponseDto> {
+    const userConfirmResponse: IUserCreateResponse = await firstValueFrom(
+      this.userServiceClient.send('user_confirm_register', {
+        ...confirmCreateUserDto,
+      }),
+    );
+
+    if (userConfirmResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: userConfirmResponse.message,
+        },
+        userConfirmResponse.status,
+      );
+    }
+
     const createMindBodyTokenResponse: ICreateMindBodyToken =
       await firstValueFrom(
         this.tokenServiceClient.send('create_mind_body_token', {}),
@@ -286,21 +302,6 @@ export class UserController {
       ),
     );
 
-    const userConfirmResponse: IUserCreateResponse = await firstValueFrom(
-      this.userServiceClient.send('user_confirm_register', {
-        ...confirmCreateUserDto,
-      }),
-    );
-
-    if (userConfirmResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: userConfirmResponse.message,
-        },
-        userConfirmResponse.status,
-      );
-    }
-
     return {
       message: 'Your registration has been successfully confirmed',
     };
@@ -314,7 +315,7 @@ export class UserController {
       this.userServiceClient.send('user_resend_code', resendCodeDto.email),
     );
 
-    if (resendCodeResponse.status !== HttpStatus.CREATED) {
+    if (resendCodeResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
           message: resendCodeResponse.message,

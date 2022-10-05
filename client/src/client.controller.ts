@@ -9,6 +9,7 @@ import {
   GetClientMemberDto,
   GetClientsDto,
   GetClientsResponseDto,
+  GetClientVisitsDto,
   UpdateClientDto,
 } from './interfaces';
 import { MindBodyErrorResponse } from './types';
@@ -229,6 +230,73 @@ export class ClientController {
         status: HttpStatus.OK,
         message: 'Client Updated Successfully',
         data: response.data.Client,
+        errors: null,
+      };
+    } catch (e) {
+      const { response } = e as AxiosError;
+
+      const { Error } = response.data as MindBodyErrorResponse;
+
+      console.log(response);
+
+      if (response.status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          status: response.status,
+          data: null,
+          message: Error.Message,
+          errors: e.errors,
+        };
+      }
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+        data: null,
+        errors: e.errors,
+      };
+    }
+  }
+
+  @MessagePattern('client_visits')
+  async getClientVisits(@Payload() getClientVisitsDto: GetClientVisitsDto) {
+    const { mindBodyAuthorization, clientId } = getClientVisitsDto;
+
+    if (!getClientVisitsDto) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Missing data for update client',
+        data: null,
+        errors: null,
+      };
+    }
+
+    if (
+      !mindBodyAuthorization ||
+      mindBodyAuthorization === '' ||
+      !clientId ||
+      clientId === ''
+    ) {
+      return {
+        status: HttpStatus.FORBIDDEN,
+        message: 'forbidden resource',
+        data: null,
+        errors: null,
+      };
+    }
+
+    this.httpService.axiosRef.defaults.headers.common['Authorization'] =
+      mindBodyAuthorization;
+
+    try {
+      const response = await this.httpService.axiosRef.get(`/clientvisits`, {
+        params: {
+          ...getClientVisitsDto,
+        },
+      });
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Client Visits Class Found',
+        data: response.data.Visits,
         errors: null,
       };
     } catch (e) {

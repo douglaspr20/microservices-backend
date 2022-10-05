@@ -38,7 +38,6 @@ import {
   UpdateMindBodyAppointmentDto,
   IUpdateMindBodyAppointmentResponse,
   UpdateMindBodyAppointmentResponseDto,
-  getAppointmentClassResponseDto,
   IAppointCerboResponse,
   ICerboProviderResponse,
   IGetCerboProviderResponse,
@@ -48,6 +47,7 @@ import { AuthGuard } from '@nestjs/passport';
 import {
   AddClientToClassDto,
   AddClientToClassResponseDto,
+  GetClientVisitsDto,
   IAddClientToClassResponse,
   IClass,
   IGetClassesResponse,
@@ -66,6 +66,9 @@ export class AppointmentController {
     private readonly appoitmentServiceClient: ClientProxy,
     @Inject('CLASS_SERVICE')
     private readonly classServiceClient: ClientProxy,
+
+    @Inject('CLIENT_SERVICE')
+    private readonly clientServiceClient: ClientProxy,
   ) {}
 
   @Get()
@@ -538,15 +541,44 @@ export class AppointmentController {
 
   @Get('class')
   async getAppointmentClass(
+    @Query() queryParams: GetClientVisitsDto,
     @GetUserRequest() user: IUser,
-  ): Promise<getAppointmentClassResponseDto> {
-    const getClassesAppointmentResponse: IGetClassesResponse =
-      await firstValueFrom(
-        this.classServiceClient.send('get_classes', {
-          clientId: user.mindBodyClientId,
-          mindBodyAuthorization: user.mindBodyToken,
-        }),
-      );
+  ): Promise<any> {
+    let startDate = queryParams.startDate;
+    let endDate = queryParams.endDate;
+
+    if (!startDate) {
+      const userStartDate = new Date(user.createdAt);
+
+      const yearStartDate = userStartDate.getFullYear();
+      const monthStartDate = userStartDate.getMonth() + 1;
+      const dateStarDate = userStartDate.getDate();
+
+      startDate = `${yearStartDate}-${
+        monthStartDate <= 9 ? `0${monthStartDate}` : monthStartDate
+      }-${dateStarDate}`;
+    }
+
+    if (!endDate) {
+      const endCurentDate = new Date();
+
+      const yearEndDate = endCurentDate.getFullYear() + 1;
+      const monthEndDate = endCurentDate.getMonth() + 3;
+      const dateEndDate = endCurentDate.getDate();
+
+      endDate = `${yearEndDate}-${
+        monthEndDate <= 9 ? `0${monthEndDate}` : monthEndDate
+      }-${dateEndDate}`;
+    }
+
+    const getClassesAppointmentResponse: any = await firstValueFrom(
+      this.clientServiceClient.send('client_visits', {
+        clientId: user.mindBodyClientId,
+        mindBodyAuthorization: user.mindBodyToken,
+        startDate,
+        endDate,
+      }),
+    );
 
     if (getClassesAppointmentResponse.status !== HttpStatus.OK) {
       throw new HttpException(
@@ -558,12 +590,7 @@ export class AppointmentController {
     }
 
     return {
-      message: 'Appointment Classes',
-      data: {
-        classes: getClassesAppointmentResponse.data.Classes,
-        paginationResponse:
-          getClassesAppointmentResponse.data.PaginationResponse,
-      },
+      classesHealthAppointments: getClassesAppointmentResponse.data,
     };
   }
 

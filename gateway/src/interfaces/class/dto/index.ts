@@ -4,3 +4,4 @@ export * from './get-class-description-response.dto';
 export * from './get-class-descriptions.dto';
 export * from './add-client-to-class.dto';
 export * from './add-client-to-class-response.dto';
+export * from './get-visits-class-user-dto';

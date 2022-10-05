@@ -96,31 +96,33 @@ export class AppointmentController {
       getMindBodyAppointmentResponse,
       getCerboAppointmentResponse,
       getClassesAppointmentResponse,
-    ]: [
-      IGetMindBodyAppointmentsResponse,
-      IGetCerboAppointmentsResponse,
-      IGetClassesResponse,
-    ] = await Promise.all([
-      firstValueFrom(
-        this.appoitmentServiceClient.send('get_mindboy_appointments', {
-          mindBodyAuthorization: user.mindBodyToken,
-          clientId: user.mindBodyClientId,
-        }),
-      ),
-      firstValueFrom(
-        this.appoitmentServiceClient.send('get_cerbo_appointments_range_date', {
-          start_date: formatStartDate,
-          end_date: formatEndDate,
-          pt_id: user.cerboPatientId,
-        }),
-      ),
-      firstValueFrom(
-        this.classServiceClient.send('get_classes', {
-          clientId: user.mindBodyClientId,
-          mindBodyAuthorization: user.mindBodyToken,
-        }),
-      ),
-    ]);
+    ]: [IGetMindBodyAppointmentsResponse, IGetCerboAppointmentsResponse, any] =
+      await Promise.all([
+        firstValueFrom(
+          this.appoitmentServiceClient.send('get_mindboy_appointments', {
+            mindBodyAuthorization: user.mindBodyToken,
+            clientId: user.mindBodyClientId,
+          }),
+        ),
+        firstValueFrom(
+          this.appoitmentServiceClient.send(
+            'get_cerbo_appointments_range_date',
+            {
+              start_date: formatStartDate,
+              end_date: formatEndDate,
+              pt_id: user.cerboPatientId,
+            },
+          ),
+        ),
+        await firstValueFrom(
+          this.clientServiceClient.send('client_visits', {
+            clientId: user.mindBodyClientId,
+            mindBodyAuthorization: user.mindBodyToken,
+            startDate,
+            endDate,
+          }),
+        ),
+      ]);
 
     if (
       getCerboAppointmentResponse.status !== HttpStatus.OK &&
@@ -147,7 +149,7 @@ export class AppointmentController {
         ? getMindBodyAppointmentResponse.data.Appointments
         : [],
       classes: getClassesAppointmentResponse.data
-        ? getClassesAppointmentResponse.data.Classes
+        ? getClassesAppointmentResponse.data
         : [],
     };
   }

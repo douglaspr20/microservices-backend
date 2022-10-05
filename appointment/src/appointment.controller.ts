@@ -498,12 +498,10 @@ export class AppointmentController {
         },
       );
 
-      console.log(response);
-
       return {
         status: HttpStatus.OK,
         message: 'Appointment Added',
-        data: response.data,
+        data: response.data.Appointment,
         errors: null,
       };
     } catch (e) {

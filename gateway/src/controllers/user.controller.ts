@@ -174,6 +174,7 @@ export class UserController {
   }
 
   @Post('register/confirm')
+  @HttpCode(HttpStatus.OK)
   async confirmRegister(
     @Body() confirmCreateUserDto: ConfirmCreateUserDto,
   ): Promise<CreateUserResponseDto> {

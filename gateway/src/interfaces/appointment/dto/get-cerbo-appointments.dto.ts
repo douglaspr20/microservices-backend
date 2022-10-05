@@ -17,9 +17,11 @@ export class GetCerboAppointmentsDto {
   offset?: number;
 
   @IsDateString()
+  @IsOptional()
   start_date: string;
 
   @IsDateString()
+  @IsOptional()
   end_date: string;
 
   @IsNumberString()

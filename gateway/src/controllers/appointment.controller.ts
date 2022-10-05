@@ -35,7 +35,6 @@ import {
   IGetMindBodyAppointmentsResponse,
   GetMindBodyAppointmentsResponseDto,
   ISingleMindBodyAppointmentResponse,
-  GetSingleMindBodyhAppointmentReponseDto,
   UpdateMindBodyAppointmentDto,
   IUpdateMindBodyAppointmentResponse,
   UpdateMindBodyAppointmentResponseDto,
@@ -54,6 +53,7 @@ import {
   IGetClassesResponse,
 } from '../interfaces/class';
 import {
+  dateFunctions,
   formatHealthAppointment,
   formatHealthAppointmentArray,
 } from '../utils';
@@ -77,9 +77,17 @@ export class AppointmentController {
     const monthStartDate = startDate.getMonth() + 1;
     const dateStarDate = startDate.getDate();
 
-    const yearEndDate = endDate.getFullYear();
-    const monthEndDate = endDate.getMonth() + 1;
+    const yearEndDate = endDate.getFullYear() + 1;
+    const monthEndDate = endDate.getMonth() + 3;
     const dateEndDate = endDate.getDate();
+
+    const formatStartDate = `${yearStartDate}-${
+      monthStartDate <= 9 ? `0${monthStartDate}` : monthStartDate
+    }-${dateStarDate}`;
+
+    const formatEndDate = `${yearEndDate}-${
+      monthEndDate <= 9 ? `0${monthEndDate}` : monthEndDate
+    }-${dateEndDate}`;
 
     const [
       getMindBodyAppointmentResponse,
@@ -98,8 +106,8 @@ export class AppointmentController {
       ),
       firstValueFrom(
         this.appoitmentServiceClient.send('get_cerbo_appointments_range_date', {
-          start_date: `${yearStartDate}-0${monthStartDate}-${dateStarDate}`,
-          end_date: `${yearEndDate}-0${monthEndDate}-${dateEndDate}`,
+          start_date: formatStartDate,
+          end_date: formatEndDate,
           pt_id: user.cerboPatientId,
         }),
       ),
@@ -146,10 +154,39 @@ export class AppointmentController {
     @Query() queryParams: GetCerboAppointmentsDto,
     @GetUserRequest() user: IUser,
   ) {
+    let start_date = queryParams.start_date;
+    let end_date = queryParams.end_date;
+
+    if (!start_date) {
+      const startDate = new Date(user.createdAt);
+
+      const yearStartDate = startDate.getFullYear();
+      const monthStartDate = startDate.getMonth() + 1;
+      const dateStarDate = startDate.getDate();
+
+      start_date = `${yearStartDate}-${
+        monthStartDate <= 9 ? `0${monthStartDate}` : monthStartDate
+      }-${dateStarDate}`;
+    }
+
+    if (!end_date) {
+      const endDate = new Date();
+
+      const yearEndDate = endDate.getFullYear() + 1;
+      const monthEndDate = endDate.getMonth() + 3;
+      const dateEndDate = endDate.getDate();
+
+      end_date = `${yearEndDate}-${
+        monthEndDate <= 9 ? `0${monthEndDate}` : monthEndDate
+      }-${dateEndDate}`;
+    }
+
     const getCerboAppointmentResponse: IGetCerboAppointmentsResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('get_cerbo_appointments_range_date', {
           ...queryParams,
+          start_date,
+          end_date,
           pt_id: user.cerboPatientId,
         }),
       );
@@ -268,6 +305,25 @@ export class AppointmentController {
     @Body() addCerboAppointmentDto: AddCerboAppointmentDto,
     @GetUserRequest() user: IUser,
   ): Promise<IAppointCerboResponse> {
+    if (
+      dateFunctions.isAfter(
+        new Date(),
+        new Date(addCerboAppointmentDto.startDateTime),
+      ) ||
+      dateFunctions.isAfter(
+        new Date(),
+        new Date(addCerboAppointmentDto.endDateTime),
+      )
+    ) {
+      throw new HttpException(
+        {
+          message:
+            'the start and end date of the appointment has to be after the current date',
+        },
+        400,
+      );
+    }
+
     const addedAppoimentCerboResponse: IAddedCerboAppointment =
       await firstValueFrom(
         this.appoitmentServiceClient.send('add_cerbo_appointment', {
@@ -397,7 +453,7 @@ export class AppointmentController {
   ): Promise<IAppointmentMindBody> {
     const addAppoimentResponse: IAppointmentAddedResponse =
       await firstValueFrom(
-        this.appoitmentServiceClient.send('add_appointment', {
+        this.appoitmentServiceClient.send('add_mindbody_appointment', {
           ...addAppointmentDto,
           mindBodyAuthorization: user.mindBodyToken,
           ClientId: user.mindBodyClientId,
@@ -408,8 +464,6 @@ export class AppointmentController {
       throw new HttpException(
         {
           message: addAppoimentResponse.message,
-          data: null,
-          errors: addAppoimentResponse.errors,
         },
         addAppoimentResponse.status,
       );
@@ -424,7 +478,7 @@ export class AppointmentController {
   async getSingleAppointmentWellness(
     @Param('appointmentId') appointmentId: number,
     @GetUserRequest() user: IUser,
-  ): Promise<GetSingleMindBodyhAppointmentReponseDto> {
+  ): Promise<IAppointmentMindBody> {
     const getSingleMindBodyAppointmentResponse: ISingleMindBodyAppointmentResponse =
       await firstValueFrom(
         this.appoitmentServiceClient.send('get_single_mindboy_appointment', {
@@ -443,7 +497,7 @@ export class AppointmentController {
     }
 
     return {
-      data: getSingleMindBodyAppointmentResponse.data,
+      ...getSingleMindBodyAppointmentResponse.data,
     };
   }
 

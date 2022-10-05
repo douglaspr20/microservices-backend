@@ -119,7 +119,7 @@ export class UserController {
       await this.userService.confirmRegister(confirmCreateUserDto);
 
       return {
-        status: HttpStatus.CREATED,
+        status: HttpStatus.OK,
         message: 'Account successfully verified',
       };
     } catch (e) {
@@ -222,6 +222,17 @@ export class UserController {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Bad or missing parameter.',
+      };
+    }
+
+    const user = await this.userService.searchUserByEmail(
+      changePasswordDto.email,
+    );
+
+    if (!user) {
+      return {
+        status: HttpStatus.NOT_FOUND,
+        message: 'Incorrect username or password.',
       };
     }
 

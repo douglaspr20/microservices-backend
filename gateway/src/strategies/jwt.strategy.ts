@@ -43,6 +43,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('You need verify your email for logging');
     }
 
+    if (!getUserResponse.user.id) {
+      throw new UnauthorizedException();
+    }
+
     if (!payload.sub) return false;
 
     return { ...getUserResponse.user, sub: payload.sub };

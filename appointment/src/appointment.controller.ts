@@ -486,9 +486,8 @@ export class AppointmentController {
     }
 
     try {
-      console.log(addAppointmentDto);
       const response = await this.httpService.axiosRef.post(
-        `${this.mindbodyUrl}/addappointment`,
+        `${this.mindbodyUrl}/appointment/addappointment`,
         addAppointmentDto,
         {
           headers: {

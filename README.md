@@ -18,22 +18,27 @@ Jyzen Api created with NestJs
 you can find which environment variables are used by the project in the `env.template` file
 rename to .env
 
-## Install Dependencies and run gateway and microservices
+## Running the Api
 
-For the moment, while I solve the problem with docker, the way to run the different microservices and the gateway is:
+Execute `docker network create infrastructure && cp .env && docker-compose up -d` from the root of the repository
 
-````
-$ cd gatetway/microservicename
+## Launch services for integration testing (using docker-compose)
 
-$ yarn install
+- Execute `cp .env`
+- Execute `docker-compose -f ./docker-compose.yml up -d` from the root of the repository
+- Run `cd ./gateway && yarn install && yarn start` from the root of this repo
 
-```bash
-# development
-$ yarn start
+## Brief architecture overview
 
-# watch mode
-$ yarn start:dev
+This API showcase consists of the following parts:
 
-# production mode
-$ yarn start:prod
-````
+- API gateway
+- Appointment service - responsible for CRUD operations on appointments (mindbody and cerbo)
+- Class service - responsible for CRUD operations on classes (mindbody)
+- Client service - responsible for CRUD operations for clients (mindbody)
+- Enrrollment service - responsible for CRUD operations on enrrollments (mindbody)
+- Patient service - responsible for CRUD operations for patients (cerbo)
+- Sale service - responsible for CRUD operations for sales (mindbody)
+- Token service - responsible for decoding and create tokens for users
+- User service - responsible for CRUD operations on users and user authentication process
+- The service interact via **TCP sockets**
